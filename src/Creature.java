@@ -3,7 +3,7 @@ import java.util.ArrayList;
 /**
  * <li>FileName: Creature.java
  * <li>Class: CMSC 335 6380 Object-Oriented and Concurrent Programming
- * <li>Project 1
+ * <li>Project 2
  * <li>Author: Robert Lee Carle
  * <li>Date: 1/11/2016
  * <li>Platform/Compiler: Java 8 with Eclipse IDE

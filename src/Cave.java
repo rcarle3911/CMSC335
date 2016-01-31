@@ -1,12 +1,13 @@
 import java.io.File;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Scanner;
 
 /**
  * <li>FileName: Cave.java
  * <li>Class: CMSC 335 6380 Object-Oriented and Concurrent Programming
- * <li>Project 1
+ * <li>Project 2
  * <li>Author: Robert Lee Carle
  * <li>Date: 1/11/2016
  * <li>Platform/Compiler: Java 8 with Eclipse IDE
@@ -34,6 +35,7 @@ public class Cave {
 	 */
 	public void loadFile(File file) {
 		try {
+			HashMap<Integer, CaveElement> hm = new HashMap<Integer, CaveElement>();
 			Scanner s = new Scanner(file);
 			String line;
 			while (s.hasNextLine()) {
@@ -43,19 +45,19 @@ public class Cave {
 				case '/':
 					continue;
 				case 'p':
-					addParty(line);
+					addParty(line, hm);
 					break;
 				case 'c':
-					addCreature(line);
+					addCreature(line, hm);
 					break;
 				case 't':
-					addTreasure(line);
+					addTreasure(line, hm);
 					break;
 				case 'a':
-					addArtifact(line);
+					addArtifact(line, hm);
 					break;
 				case 'j':
-					addJob(line);
+					addJob(line, hm);
 					break;
 				default:
 					throw new Exception("Incorrect Format");
@@ -91,9 +93,12 @@ public class Cave {
 	 * Takes a line of inputs in a specific format, splits it, and creates a new Party object. Adds it to the collection.
 	 * @param line String of inputs
 	 */
-	private void addParty(String line){
+	private void addParty(String line, HashMap<Integer, CaveElement> hm) {
 		ArrayDeque<String> queue = splitLine(line);
-		addParty(new Party(Integer.parseInt(queue.remove()), queue.remove()));
+		Party p = new Party(Integer.parseInt(queue.remove()),			//index
+							queue.remove());							//name
+		hm.put(p.getIndex(), p);
+		addParty(p);
 	}
 	
 	/**
@@ -108,20 +113,34 @@ public class Cave {
 	 * Splits input string into a queue and builds a Creature with it. Adds this to the party indicated by parentIndex.
 	 * @param line
 	 */
-	private void addCreature(String line) {
+	private void addCreature(String line, HashMap<Integer, CaveElement> hm) {
 		try {
 			ArrayDeque<String> queue = splitLine(line);
-			addCreature(new Creature(
+			Creature c = new Creature(
 					Integer.parseInt(queue.remove()), 					//index
 					queue.remove(),										//type
 					queue.remove(),										//name
 					Integer.parseInt(queue.remove()),					//parent index
 					Integer.parseInt(queue.remove()),					//empathy
 					Integer.parseInt(queue.remove()),					//fear
-					Double.parseDouble(queue.remove())));				//carrying capacity	
+					Double.parseDouble(queue.remove()));				//carrying capacity
+			
+			hm.put(c.getIndex(), c);
+			
+			if (c.getParentIndex() != 0) {
+				CaveElement p = hm.get(c.getParentIndex());
+				if (p instanceof Party) {
+					((Party) p).addCreature(c);
+				} else {
+					throw new Exception("Invalid parent index at creature: " + c.toString());
+				}
+			} else {
+				looseObj.add(c);
+			}
+			
 		} catch (Exception e) {
 			e.printStackTrace();
-		}		
+		}
 	}
 	
 	/**
@@ -140,24 +159,33 @@ public class Cave {
 			}
 		} else {
 			looseObj.add(c);
-		}
-		
-		
+		}		
 	}
 	
 	/**
 	 * Splits the input string into a queue and uses that to build a Treasure object. Adds this to the creature indicated by parentIndex.
 	 * @param line
 	 */
-	private void addTreasure(String line) {
+	private void addTreasure(String line, HashMap<Integer, CaveElement> hm) {
 		try {
 			ArrayDeque<String> queue = splitLine(line);
-			addTreasure(new Treasure(
+			Treasure t = new Treasure(
 					Integer.parseInt(queue.remove()),		//index
 					queue.remove(),							//type
 					Integer.parseInt(queue.remove()),		//parent index
 					Double.parseDouble(queue.remove()),		//weight
-					Double.parseDouble(queue.remove())));	//value
+					Double.parseDouble(queue.remove()));	//value			
+			
+			if (t.getParentIndex() != 0) {
+				CaveElement c = hm.get(t.getParentIndex());
+				if (c instanceof Creature) {
+					((Creature) c).addTreasure(t);
+				} else {
+					throw new Exception("Invalid parent index at treasure: " + t.toString());
+				}
+			} else {
+				looseObj.add(t);
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}		
@@ -191,13 +219,25 @@ public class Cave {
 	 * Takes a specifically formatted string input and splits into a queue. It uses this to make an Artifact object.
 	 * @param line
 	 */
-	private void addArtifact(String line) {		
+	private void addArtifact(String line, HashMap<Integer, CaveElement> hm) {		
 		try {
 			ArrayDeque<String> queue = splitLine(line);
-			addArtifact(new Artifact(
+			Artifact a = new Artifact(
 					Integer.parseInt(queue.remove()),		//index
 					queue.remove(),							//type
-					Integer.parseInt(queue.remove())));		//parent index
+					Integer.parseInt(queue.remove()));		//parent index
+			
+			if (a.getParentIndex() != 0) {
+				CaveElement c = hm.get(a.getParentIndex());
+				if (c instanceof Creature) {
+					((Creature) c).addArtifact(a);
+				} else {
+					throw new Exception("Invalid parent index at treasure: " + a.toString());
+				}
+			} else {
+				looseObj.add(a);
+			}			
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}	
@@ -225,7 +265,7 @@ public class Cave {
 		}	
 	}
 	
-	public void addJob(String line) {
+	private void addJob(String line, HashMap<Integer, CaveElement> hm) {
 		
 	}
 	
