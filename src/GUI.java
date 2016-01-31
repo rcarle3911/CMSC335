@@ -1,5 +1,6 @@
 import java.awt.BorderLayout;
 import java.awt.event.*;
+import java.util.ArrayList;
 
 import javax.swing.*;
 
@@ -38,7 +39,7 @@ public class GUI extends JFrame{
 	 */
 	private void setButtonPanel() {
 		
-		JFileChooser fc = new JFileChooser();
+		JFileChooser fc = new JFileChooser(".");
 		
 		//Load button grabs a file and loads it into the cave object.
 		JButton ld = new JButton("Load");
@@ -69,10 +70,30 @@ public class GUI extends JFrame{
 		src.addActionListener(new ActionListener() {
 			public void actionPerformed (ActionEvent e) {
 				try {
-					CaveElement ce = cave.search(cbx.getSelectedIndex(), tField.getText());
+					ArrayList<CaveElement> matches = new ArrayList<CaveElement>();
+					switch (cbx.getSelectedIndex()) {
+					
+					case 0: 
+						matches = cave.searchIndex(Integer.parseInt(tField.getText()));
+						break;
+					
+					case 1:
+						matches = cave.searchName(tField.getText());
+						break;
+					
+					case 2:
+						matches = cave.searchType(tField.getText());
+						break;
+						
+					default:
+						throw new Exception("Invalid index");
+							
+					
+					}
+					
 					//If there is a match set the text field to it.
-					if (ce != null) {
-						text.setText(ce.toString());
+					if (!matches.isEmpty()) {
+						text.setText(matches.toString());
 					//If not say it was not found.
 					} else {
 						text.setText(tField.getText() + " Not Found!");

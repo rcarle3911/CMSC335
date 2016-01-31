@@ -11,17 +11,13 @@
  */
 public abstract class CaveObject extends CaveElement{
 	private int parentIndex;
-	private String type;
 	
 	public CaveObject(int index, String type, int parentIndex) {
-		super(index);	
-		setType(type);
-		setParentIndex(parentIndex);
+		this(index, type, parentIndex, "");
 	}
 	
 	public CaveObject(int index, String type, int parentIndex, String name) {
-		super(index, name);
-		setType(type);
+		super(index, name, type);
 		setParentIndex(parentIndex);
 	}
 	
@@ -29,21 +25,13 @@ public abstract class CaveObject extends CaveElement{
 		return parentIndex;
 	}
 	
-	public String getType() {
-		return type;
-	}
-	
 	public void setParentIndex(int parentIndex) {
 		this.parentIndex = parentIndex;
 	}
 	
-	public void setType(String type) {
-		this.type = type;
-	}
-	
 	@Override
 	public String toString() {
-		return "(" + type + ", " + getIndex() + ")";
+		return "(" + getType() + ", " + getIndex() + ")";
 	}
 	
 }

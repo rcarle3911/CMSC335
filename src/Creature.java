@@ -65,68 +65,50 @@ public class Creature extends CaveObject{
 		this.carryingCapacity = carryingCapacity;
 	}
 	
-	/**
-	 * First checks if this object is a match. Otherwise, it continues the search through the creatures.
-	 * @param index
-	 * @return CaveObject
-	 */
-	public CaveObject search(int index) {
-		if (getIndex() == index) return this;
+	@Override
+	public ArrayList<CaveElement> searchIndex(int index) {
+		ArrayList<CaveElement> matched = new ArrayList<CaveElement>();
+		if (getIndex() == index) matched.add(this);
 		
-		for (Treasure t : treasures) {
-			if (t.getIndex() == index) return t;
+		for(Treasure t : treasures) {
+			if (t.getIndex() == index) matched.add(t);
 		}
 		
-		for (Artifact a : artifacts) {
-			if (a.getIndex() == index) return a;
+		for(Artifact a : artifacts) {
+			if (a.getIndex() == index) matched.add(a);
 		}
 		
-		return null;
+		return matched;
 	}
 	
-	/**
-	 * First checks if it's a match. Otherwise, it continues the search through its treasures and artifacts.
-	 * Throws exception if type input is invalid.
-	 * @param type 0 for index, 1 for Name, 2 for Type
-	 * @param target
-	 * @return
-	 * @throws Exception
-	 */
-	public CaveObject search(int type, String target) throws Exception {
-			
-		switch (type) {
-		case 0:
-			return search(Integer.parseInt(target));
-		case 1:
-			if (getName().equals(target)) return this;
-			
-			for (Treasure t : treasures) {
-				if (t.getName().equals(target)) return t;
-			}
-			
-			for (Artifact a : artifacts) {
-				if (a.getName().equals(target)) return a;
-			}
-			
-			break;
-			
-		case 2:
-			if (getType().equals(target)) return this;
-			
-			for (Treasure t : treasures) {
-				if (t.getType().equals(target)) return t;
-			}
-			
-			for (Artifact a : artifacts) {
-				if (a.getType().equals(target)) return a;
-			}
-			
-			break;
-		default:
-			throw new Exception(type + ": Invalid search selection. Must be 0, 1, or 2");
+	@Override
+	public ArrayList<CaveElement> searchName(String target) {
+		ArrayList<CaveElement> matched = new ArrayList<CaveElement>();
+		if (getName().equals(target)) matched.add(this);
+		
+		for(Treasure t : treasures) {
+			if (t.getName().equals(target)) matched.add(t);
 		}
 		
-		return null;
+		for(Artifact a : artifacts) {
+			if (a.getName().equals(target)) matched.add(a);
+		}
+		return matched;
+	}
+	
+	@Override
+	public ArrayList<CaveElement> searchType(String target) {
+		ArrayList<CaveElement> matched = new ArrayList<CaveElement>();
+		if (getType().equals(target)) matched.add(this);
+		
+		for(Treasure t : treasures) {
+			if (t.getType().equals(target)) matched.add(t);
+		}
+		
+		for(Artifact a : artifacts) {
+			if (a.getType().equals(target)) matched.add(a);
+		}
+		return matched;
 	}
 	
 	@Override

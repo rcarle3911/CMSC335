@@ -31,46 +31,37 @@ public class Party extends CaveElement {
 	 * @param index
 	 * @return CaveElement
 	 */
-	public CaveElement search(int index) {
-		if (getIndex() == index) return this;
-		CaveObject co = null;
+	@Override
+	public ArrayList<CaveElement> searchIndex(int index) {
+		ArrayList<CaveElement> matched = new ArrayList<CaveElement>();
+		if (getIndex() == index) matched.add(this);
+		
 		for(Creature c : creatures) {
-			co = c.search(index);
-			if (co != null) break;
+			matched.addAll(c.searchIndex(index));
 		}
-		return co;
+		return matched;
 	}
 	
-	/**
-	 * First checks if it's a match. Otherwise, it continues the search through its creatures.
-	 * Throws exception if type input is invalid.
-	 * @param type 0 for index, 1 for Name, 2 for Type
-	 * @param target
-	 * @return
-	 * @throws Exception
-	 */
-	public CaveElement search(int type, String target) throws Exception {
+	@Override
+	public ArrayList<CaveElement> searchName(String target) {
+		ArrayList<CaveElement> matched = new ArrayList<CaveElement>();
+		if (getName().equals(target)) matched.add(this);
 		
-		switch (type) {
-		case 0:
-			return search(Integer.parseInt(target));
-			
-		case 1:
-			if (getName().equals(target)) return this;
-			
-		case 2:
-			CaveObject co = null;
-			for(Creature c : creatures) {
-				co = c.search(type, target);
-				if (co != null) return co;
-			}
-			break;
-		default:
-			throw new Exception(type + ": Invalid search selection. Must be 0,1, or 2.");				
+		for(Creature c : creatures) {
+			matched.addAll(c.searchName(target));
 		}
-		
-		return null;
-	}	
+		return matched;
+	}
+	
+	@Override
+	public ArrayList<CaveElement> searchType(String target) {
+		ArrayList<CaveElement> matched = new ArrayList<CaveElement>();
+				
+		for(Creature c : creatures) {
+			matched.addAll(c.searchType(target));
+		}
+		return matched;
+	}
 	
 	@Override
 	public String toString() {

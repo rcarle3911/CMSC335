@@ -151,7 +151,7 @@ public class Cave {
 	 */
 	public void addCreature(Creature c) throws Exception {		
 		if (c.getParentIndex() != 0) {
-			CaveElement p = search(c.getParentIndex());
+			CaveElement p = searchIndex(c.getParentIndex()).get(0);
 			if (p instanceof Party) {
 				((Party) p).addCreature(c);
 			} else {
@@ -200,7 +200,7 @@ public class Cave {
 	 */
 	public void addTreasure(Treasure t) throws Exception {
 		if (t.getParentIndex() != 0) {
-			CaveElement c = search(t.getParentIndex());
+			CaveElement c = searchIndex(t.getParentIndex()).get(0);
 						
 			if (c instanceof Creature) {
 				((Creature) c).addTreasure(t);
@@ -253,7 +253,7 @@ public class Cave {
 	public void addArtifact(Artifact a) throws Exception {
 	
 		if (a.getParentIndex() != 0) {
-			CaveElement c = search(a.getParentIndex());
+			CaveElement c = searchIndex(a.getParentIndex()).get(0);
 			
 			if (c instanceof Creature) {
 				((Creature) c).addArtifact(a);
@@ -274,7 +274,7 @@ public class Cave {
 	 * @param index
 	 */
 	public void remove(int index) {
-		parties.remove(search(index));
+		parties.remove(searchIndex(index));
 	}
 	
 	/**
@@ -282,40 +282,47 @@ public class Cave {
 	 * @param index
 	 * @return
 	 */
-	public CaveElement search(int index) {
-		CaveElement ce = null;
+	public ArrayList<CaveElement> searchIndex(int index) {
+		ArrayList<CaveElement> matched = new ArrayList<CaveElement>();
+		
 		for (Party p : parties) {
-			ce = p.search(index);
-			if (ce != null) return ce;
-		}		
-		return ce;
-	}
-	
-	/**
-	 * Iterates through every object in the game until a match is found. Throws exception for invalid input.
-	 * @param type 0 for index, 1 for Name, 2 for Type
-	 * @param target
-	 * @return
-	 * @throws Exception
-	 */
-	public CaveElement search(int type, String target) throws Exception {
-		switch (type) {
-		case 0:
-			return search(Integer.parseInt(target));
-		case 1:
-		case 2:
-			CaveElement ce = null;
-			for (Party p : parties) {
-				ce = p.search(type, target);
-				if (ce != null) return ce;
-			}
-			break;
-		default:
-			throw new Exception(type + ": Invalid search selection. Must be 0, 1, or 2.");
+			matched.addAll(p.searchIndex(index));
 		}
 		
-		return null;
+		for (CaveElement ce : looseObj) {
+			matched.addAll(ce.searchIndex(index));
+		}
+		
+		return matched;
 	}
+	
+	public ArrayList<CaveElement> searchName(String target) {
+		ArrayList<CaveElement> matched = new ArrayList<CaveElement>();	
+		
+		for (Party p : parties) {
+			matched.addAll(p.searchName(target));
+		}
+		
+		for (CaveElement ce : looseObj) {
+			matched.addAll(ce.searchName(target));
+		}
+		
+		return matched;
+	}
+	
+	public ArrayList<CaveElement> searchType(String target) {
+		ArrayList<CaveElement> matched = new ArrayList<CaveElement>();	
+		
+		for (Party p : parties) {
+			matched.addAll(p.searchType(target));
+		}
+		
+		for (CaveElement ce : looseObj) {
+			matched.addAll(ce.searchType(target));
+		}
+		return matched;
+	}
+	
 	/**
 	 * Prints each party with the name and index. Each creature's name, type, and index belonging to the party is printed below and tabbed over.
 	 * Each treasure and artifact's type and index is printed below the creature it belongs to.

@@ -1,3 +1,5 @@
+import java.util.ArrayList;
+
 /**
  * <li>FileName: CaveElement.java
  * <li>Class: CMSC 335 6380 Object-Oriented and Concurrent Programming
@@ -11,6 +13,7 @@
  */
 public abstract class CaveElement {
 	private String name;
+	private String type;
 	private int index;
 	
 	public CaveElement(int index) {
@@ -22,6 +25,11 @@ public abstract class CaveElement {
 		setName(name);
 	}
 	
+	public CaveElement(int index, String name, String type) {
+		this(index, name);
+		setType(type);
+	}
+	
 	private void setIndex(int index) {
 		this.index = index;
 	}
@@ -30,12 +38,38 @@ public abstract class CaveElement {
 		this.name = name;
 	}
 	
+	public void setType(String type) {
+		this.type = type;
+	}
+	
 	public int getIndex() {
 		return index;
 	}
 	
 	public String getName() {
 		return name;
+	}
+	
+	public String getType() {
+		return type;
+	}
+	
+	public ArrayList<CaveElement> searchIndex(int index) {
+		ArrayList<CaveElement> matched = new ArrayList<CaveElement>();
+		if (getIndex() == index) matched.add(this);
+		return matched;
+	}
+	
+	public ArrayList<CaveElement> searchName(String target) {
+		ArrayList<CaveElement> matched = new ArrayList<CaveElement>();
+		if (getName().equals(target)) matched.add(this);
+		return matched;
+	}
+	
+	public ArrayList<CaveElement> searchType(String target) {
+		ArrayList<CaveElement> matched = new ArrayList<CaveElement>();
+		if (getType().equals(target)) matched.add(this);
+		return matched;
 	}
 	
 	@Override
