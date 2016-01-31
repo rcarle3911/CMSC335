@@ -1,13 +1,13 @@
 /**
- * FileName: CaveElement.java
- * Class: CMSC 335 6380 Object-Oriented and Concurrent Programming
- * Project 1
- * Author: Robert Lee Carle
- * Date: 1/17/2016
- * Platform/Compiler: Java 8 with Eclipse IDE
- * Instructor: Nicholas Duchon
- * Purpose: CaveElement class is the parent class that all elements of the game derive from. Most importantly enforces everything has an index.
- * Due: 1/24/2016
+ * <li>FileName: CaveElement.java
+ * <li>Class: CMSC 335 6380 Object-Oriented and Concurrent Programming
+ * <li>Project 1
+ * <li>Author: Robert Lee Carle
+ * <li>Date: 1/17/2016
+ * <li>Platform/Compiler: Java 8 with Eclipse IDE
+ * <li>Instructor: Nicholas Duchon
+ * <li>Purpose: CaveElement class is the parent class that all elements of the game derive from. Most importantly enforces everything has an index.
+ * <li>Due: 1/24/2016
  */
 public abstract class CaveElement {
 	private String name;

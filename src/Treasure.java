@@ -1,13 +1,13 @@
 /**
- * FileName: Treasure.java
- * Class: CMSC 335 6380 Object-Oriented and Concurrent Programming
- * Project 1
- * Author: Robert Lee Carle
- * Date: 1/11/2016
- * Platform/Compiler: Java 8 with Eclipse IDE
- * Instructor: Nicholas Duchon
- * Purpose: Treasure class that extends GameObject and adds weight and value fields.
- * Due: 1/24/2016
+ * <li>FileName: Treasure.java
+ * <li>Class: CMSC 335 6380 Object-Oriented and Concurrent Programming
+ * <li>Project 1
+ * <li>Author: Robert Lee Carle
+ * <li>Date: 1/11/2016
+ * <li>Platform/Compiler: Java 8 with Eclipse IDE
+ * <li>Instructor: Nicholas Duchon
+ * <li>Purpose: Treasure class that extends GameObject and adds weight and value fields.
+ * <li>Due: 1/24/2016
  */
 public class Treasure extends CaveObject{
 	private double weight, value;

@@ -1,15 +1,15 @@
 import java.util.ArrayList;
 
 /**
- * FileName: Creature.java
- * Class: CMSC 335 6380 Object-Oriented and Concurrent Programming
- * Project 1
- * Author: Robert Lee Carle
- * Date: 1/11/2016
- * Platform/Compiler: Java 8 with Eclipse IDE
- * Instructor: Nicholas Duchon
- * Purpose: Creature class which holds the characteristics of the creature and a list of artifacts and treasures.
- * Due: 1/24/2016
+ * <li>FileName: Creature.java
+ * <li>Class: CMSC 335 6380 Object-Oriented and Concurrent Programming
+ * <li>Project 1
+ * <li>Author: Robert Lee Carle
+ * <li>Date: 1/11/2016
+ * <li>Platform/Compiler: Java 8 with Eclipse IDE
+ * <li>Instructor: Nicholas Duchon
+ * <li>Purpose: Creature class which holds the characteristics of the creature and a list of artifacts and treasures.
+ * <li>Due: 1/24/2016
  */
 public class Creature extends CaveObject{
 	private int empathy, fear;

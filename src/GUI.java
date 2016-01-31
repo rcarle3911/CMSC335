@@ -4,15 +4,15 @@ import java.awt.event.*;
 import javax.swing.*;
 
 /**
- * FileName: GUI.java
- * Class: CMSC 335 6380 Object-Oriented and Concurrent Programming
- * Project 1
- * Author: Robert Lee Carle
- * Date: 1/11/2016
- * Platform/Compiler: Java 8 with Eclipse IDE
- * Instructor: Nicholas Duchon
- * Purpose: Provides and graphical interface to the game. Executes main method.
- * Due: 1/24/2016
+ * <li>FileName: GUI.java
+ * <li>Class: CMSC 335 6380 Object-Oriented and Concurrent Programming
+ * <li>Project 1
+ * <li>Author: Robert Lee Carle
+ * <li>Date: 1/11/2016
+ * <li>Platform/Compiler: Java 8 with Eclipse IDE
+ * <li>Instructor: Nicholas Duchon
+ * <li>Purpose: Provides and graphical interface to the game. Executes main method.
+ * <li>Due: 1/24/2016
  */
 @SuppressWarnings("serial")
 public class GUI extends JFrame{

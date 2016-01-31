@@ -1,15 +1,15 @@
 import java.util.ArrayList;
 
 /**
- * FileName: Party.java
- * Class: CMSC 335 6380 Object-Oriented and Concurrent Programming
- * Project 1
- * Author: Robert Lee Carle
- * Date: 1/11/2016
- * Platform/Compiler: Java 8 with Eclipse IDE
- * Instructor: Nicholas Duchon
- * Purpose: Party class which holds a list of creatures and can perform search operations.
- * Due: 1/24/2016
+ * <li>FileName: Party.java
+ * <li>Class: CMSC 335 6380 Object-Oriented and Concurrent Programming
+ * <li>Project 1
+ * <li>Author: Robert Lee Carle
+ * <li>Date: 1/11/2016
+ * <li>Platform/Compiler: Java 8 with Eclipse IDE
+ * <li>Instructor: Nicholas Duchon
+ * <li>Purpose: Party class which holds a list of creatures and can perform search operations.
+ * <li>Due: 1/24/2016
  */
 public class Party extends CaveElement {
 	private ArrayList<Creature> creatures = new ArrayList<Creature>();

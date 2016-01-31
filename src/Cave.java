@@ -4,15 +4,15 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 /**
- * FileName: Cave.java
- * Class: CMSC 335 6380 Object-Oriented and Concurrent Programming
- * Project 1
- * Author: Robert Lee Carle
- * Date: 1/11/2016
- * Platform/Compiler: Java 8 with Eclipse IDE
- * Instructor: Nicholas Duchon
- * Purpose: Cave class which holds the parties and loads a data file.
- * Due: 1/24/2016
+ * <li>FileName: Cave.java
+ * <li>Class: CMSC 335 6380 Object-Oriented and Concurrent Programming
+ * <li>Project 1
+ * <li>Author: Robert Lee Carle
+ * <li>Date: 1/11/2016
+ * <li>Platform/Compiler: Java 8 with Eclipse IDE
+ * <li>Instructor: Nicholas Duchon
+ * <li>Purpose: Cave class which holds the parties and loads a data file.
+ * <li>Due: 1/24/2016
  */
 public class Cave {
 	private ArrayList<Party> parties = new ArrayList<Party>();
