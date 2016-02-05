@@ -1,4 +1,6 @@
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 /**
  * <li>FileName: Party.java
@@ -61,6 +63,69 @@ public class Party extends CaveElement {
 			matched.addAll(c.searchType(target));
 		}
 		return matched;
+	}
+	
+	public void sortName() {
+		Collections.sort(creatures, new Comparator<Creature>() {
+			@Override
+			public int compare(Creature c1, Creature c2) {				
+				return c1.getName().compareTo(c2.getName());
+			}
+		});
+	}
+	
+	public void sortAge() {
+		Collections.sort(creatures, new Comparator<Creature>() {
+			@Override
+			public int compare(Creature c1, Creature c2) {				
+				return Double.compare(c1.getAge(), c2.getAge());
+			}
+		});
+	}
+	
+	public void sortHeight() {
+		Collections.sort(creatures, new Comparator<Creature>() {
+			@Override
+			public int compare(Creature c1, Creature c2) {				
+				return Double.compare(c1.getHeight(), c2.getHeight());
+			}
+		});
+	}
+	
+	public void sortWeight() {
+		Collections.sort(creatures, new Comparator<Creature>() {
+			@Override
+			public int compare(Creature c1, Creature c2) {				
+				return Double.compare(c1.getWeight(), c2.getWeight());
+			}
+		});
+	}
+	
+	public void sortEmpathy() {
+		Collections.sort(creatures, new Comparator<Creature>() {
+			@Override
+			public int compare(Creature c1, Creature c2) {
+				return c1.getEmpathy() - c2.getEmpathy();
+			}
+		});
+	}
+	
+	public void sortFear() {
+		Collections.sort(creatures, new Comparator<Creature>() {
+			@Override
+			public int compare(Creature c1, Creature c2) {
+				return c1.getFear() - c2.getFear();
+			}
+		});
+	}
+	
+	public void sortCarryCap() {
+		Collections.sort(creatures, new Comparator<Creature>() {
+			@Override
+			public int compare(Creature c1, Creature c2) {
+				return Double.compare(c1.getCarryCap(), c2.getCarryCap());
+			}
+		});
 	}
 	
 	@Override

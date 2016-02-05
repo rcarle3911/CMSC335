@@ -1,4 +1,6 @@
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 /**
  * <li>FileName: Creature.java
@@ -13,7 +15,7 @@ import java.util.ArrayList;
  */
 public class Creature extends CaveObject{
 	private int empathy, fear;
-	private double carryingCapacity;
+	private double carryingCapacity, age, height, weight;
 	private ArrayList<Treasure> treasures = new ArrayList<Treasure>();
 	private ArrayList<Artifact> artifacts = new ArrayList<Artifact>();
 	
@@ -31,7 +33,7 @@ public class Creature extends CaveObject{
 	
 	public void addArtifact(Artifact a) {
 		artifacts.add(a);
-	}	
+	}
 	
 	public int getEmpathy() {
 		return empathy;
@@ -53,6 +55,18 @@ public class Creature extends CaveObject{
 		return artifacts;
 	}
 	
+	public double getAge() {
+		return age;
+	}
+	
+	public double getHeight() {
+		return height;
+	}
+	
+	public double getWeight() {
+		return weight;
+	}
+	
 	public void setEmpathy(int empathy) {
 		this.empathy = empathy;
 	}
@@ -63,6 +77,18 @@ public class Creature extends CaveObject{
 	
 	public void setCarryCap(double carryingCapacity) {
 		this.carryingCapacity = carryingCapacity;
+	}
+	
+	public void setAge(double age) {
+		this.age = age;
+	}
+	
+	public void setHeight(double height) {
+		this.height = height;
+	}
+	
+	public void setWeight(double weight) {
+		this.weight = weight;
 	}
 	
 	@Override
@@ -111,6 +137,33 @@ public class Creature extends CaveObject{
 		return matched;
 	}
 	
+	public void sortName() {
+		Collections.sort(artifacts, new Comparator<Artifact>() {
+			@Override
+			public int compare(Artifact a1, Artifact a2) {				
+				return a1.getName().compareTo(a2.getName());
+			}
+		});
+	}
+	
+	public void sortWeight() {
+		Collections.sort(treasures, new Comparator<Treasure>() {
+			@Override
+			public int compare(Treasure t1, Treasure t2) {				
+				return Double.compare(t1.getWeight(), t2.getWeight());
+			}
+		});
+	}
+	
+	public void sortValue() {
+		Collections.sort(treasures, new Comparator<Treasure>() {
+			@Override
+			public int compare(Treasure t1, Treasure t2) {				
+				return Double.compare(t1.getValue(), t2.getValue());
+			}
+		});
+	}
+
 	@Override
 	public String toString() { 
 		StringBuilder sb = new StringBuilder(super.toString());

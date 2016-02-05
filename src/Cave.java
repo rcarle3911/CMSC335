@@ -95,8 +95,8 @@ public class Cave {
 	 */
 	private void addParty(String line, HashMap<Integer, CaveElement> hm) {
 		ArrayDeque<String> queue = splitLine(line);
-		Party p = new Party(Integer.parseInt(queue.remove()),			//index
-							queue.remove());							//name
+		Party p = new Party(Integer.parseInt(queue.poll()),			//index
+							queue.poll());							//name
 		hm.put(p.getIndex(), p);
 		addParty(p);
 	}
@@ -117,13 +117,25 @@ public class Cave {
 		try {
 			ArrayDeque<String> queue = splitLine(line);
 			Creature c = new Creature(
-					Integer.parseInt(queue.remove()), 					//index
-					queue.remove(),										//type
-					queue.remove(),										//name
-					Integer.parseInt(queue.remove()),					//parent index
-					Integer.parseInt(queue.remove()),					//empathy
-					Integer.parseInt(queue.remove()),					//fear
-					Double.parseDouble(queue.remove()));				//carrying capacity
+					Integer.parseInt(queue.poll()), 				//index
+					queue.poll(),									//type
+					queue.poll(),									//name
+					Integer.parseInt(queue.poll()),					//parent index
+					Integer.parseInt(queue.poll()),					//empathy
+					Integer.parseInt(queue.poll()),					//fear
+					Double.parseDouble(queue.poll()));				//carrying capacity
+			
+			if (!queue.isEmpty()) {
+				c.setAge(Double.parseDouble(queue.poll()));
+				if (!queue.isEmpty()) {
+					c.setHeight(Double.parseDouble(queue.poll()));
+					if (!queue.isEmpty()) {
+						c.setWeight(Double.parseDouble(queue.poll()));
+					}
+				}
+			}
+			
+			
 			
 			hm.put(c.getIndex(), c);
 			
@@ -151,12 +163,17 @@ public class Cave {
 	 */
 	public void addCreature(Creature c) throws Exception {		
 		if (c.getParentIndex() != 0) {
-			CaveElement p = searchIndex(c.getParentIndex()).get(0);
-			if (p instanceof Party) {
-				((Party) p).addCreature(c);
-			} else {
-				throw new Exception("Invalid parent index at creature: " + c.toString());
+			ArrayList<CaveElement> array = searchIndex(c.getParentIndex());
+			if (array.isEmpty()) looseObj.add(c);
+			else {
+				CaveElement p = searchIndex(c.getParentIndex()).get(0);
+				if (p instanceof Party) {
+					((Party) p).addCreature(c);
+				} else {
+					throw new Exception("Invalid parent index at creature: " + c.toString());
+				}
 			}
+			
 		} else {
 			looseObj.add(c);
 		}		
@@ -170,11 +187,11 @@ public class Cave {
 		try {
 			ArrayDeque<String> queue = splitLine(line);
 			Treasure t = new Treasure(
-					Integer.parseInt(queue.remove()),		//index
-					queue.remove(),							//type
-					Integer.parseInt(queue.remove()),		//parent index
-					Double.parseDouble(queue.remove()),		//weight
-					Double.parseDouble(queue.remove()));	//value			
+					Integer.parseInt(queue.poll()),		//index
+					queue.poll(),						//type
+					Integer.parseInt(queue.poll()),		//parent index
+					Double.parseDouble(queue.poll()),	//weight
+					Double.parseDouble(queue.poll()));	//value			
 			
 			if (t.getParentIndex() != 0) {
 				CaveElement c = hm.get(t.getParentIndex());
@@ -223,9 +240,11 @@ public class Cave {
 		try {
 			ArrayDeque<String> queue = splitLine(line);
 			Artifact a = new Artifact(
-					Integer.parseInt(queue.remove()),		//index
-					queue.remove(),							//type
-					Integer.parseInt(queue.remove()));		//parent index
+					Integer.parseInt(queue.poll()),		//index
+					queue.poll(),						//type
+					Integer.parseInt(queue.poll()));	//parent index
+			
+			if (!queue.isEmpty()) a.setName(queue.poll());
 			
 			if (a.getParentIndex() != 0) {
 				CaveElement c = hm.get(a.getParentIndex());
@@ -321,6 +340,14 @@ public class Cave {
 			matched.addAll(ce.searchType(target));
 		}
 		return matched;
+	}
+	
+	public ArrayList<Party> getParties() {
+		return parties;
+	}
+	
+	public ArrayList<CaveObject> getLooseObj() {
+		return looseObj;
 	}
 	
 	/**

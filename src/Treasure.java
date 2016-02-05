@@ -24,8 +24,7 @@ public class Treasure extends CaveObject{
 		setWeight(weight);
 		setValue(value);
 	}
-	
-	
+		
 	/**
 	 * Setter for value field.
 	 * @param value An integer.

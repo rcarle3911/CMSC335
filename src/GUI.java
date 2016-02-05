@@ -19,7 +19,8 @@ import javax.swing.*;
 public class GUI extends JFrame{
 	private Cave cave;
 	private JTextArea text = new JTextArea(10,10);
-	private JComboBox <String> cbx = new JComboBox <String>();
+	private JComboBox <String> searchCbx = new JComboBox <String>();
+	private JComboBox <String> sortCbx = new JComboBox <String>();
 	private JTextField tField = new JTextField(10);
 	
 	public GUI(Cave cave) {
@@ -69,12 +70,15 @@ public class GUI extends JFrame{
 		JButton src = new JButton("Search");
 		src.addActionListener(new ActionListener() {
 			public void actionPerformed (ActionEvent e) {
+				text.setText("");
 				try {
 					ArrayList<CaveElement> matches = new ArrayList<CaveElement>();
-					switch (cbx.getSelectedIndex()) {
+					switch (searchCbx.getSelectedIndex()) {
 					
 					case 0: 
-						matches = cave.searchIndex(Integer.parseInt(tField.getText()));
+						String string = tField.getText();
+						if (isNumber(string)) matches = cave.searchIndex(Integer.parseInt(string));
+						else text.setText("Error: Attempted to use: " + tField.getText() + "as an index. This must be a number!");
 						break;
 					
 					case 1:
@@ -86,17 +90,15 @@ public class GUI extends JFrame{
 						break;
 						
 					default:
-						throw new Exception("Invalid index");
-							
-					
+						throw new Exception("Invalid index");					
 					}
 					
 					//If there is a match set the text field to it.
 					if (!matches.isEmpty()) {
 						text.setText(matches.toString());
 					//If not say it was not found.
-					} else {
-						text.setText(tField.getText() + " Not Found!");
+					} else {						
+						text.setText(tField.getText() + " Not Found!\n" + text.getText());
 					}
 				} catch (NumberFormatException e0) {
 					
@@ -105,7 +107,65 @@ public class GUI extends JFrame{
 				} catch (Exception e1) {
 					
 					e1.printStackTrace();
-					System.out.println("ComboBox: " + cbx.getSelectedIndex());
+					System.out.println("ComboBox: " + searchCbx.getSelectedIndex());
+				}
+			}
+		});
+		
+		JButton sortBtn = new JButton("Sort");
+		sortBtn.addActionListener(new ActionListener() {
+			public void actionPerformed (ActionEvent e) {
+				switch (((String)sortCbx.getSelectedItem())) {
+				case "Name":
+					for (Party p : cave.getParties()) {
+						p.sortName();
+						for (Creature c : p.getCreatures()) {
+							c.sortName();
+						}
+					}
+					break;
+				case "Age":
+					for (Party p : cave.getParties()) {
+						p.sortAge();
+					}
+					break;
+				case "Height":
+					for (Party p : cave.getParties()) {
+						p.sortHeight();
+					}
+					break;
+				case "Weight":
+					for (Party p : cave.getParties()) {
+						p.sortWeight();
+						for (Creature c : p.getCreatures()) {
+							c.sortWeight();
+						}
+					}
+					break;
+				case "Empathy":
+					for (Party p : cave.getParties()) {
+						p.sortEmpathy();
+					}
+					break;
+				case "Fear":
+					for (Party p : cave.getParties()) {
+						p.sortFear();
+					}
+					break;
+				case "Carrying Capacity":
+					for (Party p : cave.getParties()) {
+						p.sortCarryCap();
+					}
+					break;				
+				case "Value":
+					for (Party p : cave.getParties()) {
+						for (Creature c : p.getCreatures()) {
+							c.sortValue();
+						}
+					}
+					break;
+				default:
+					text.setText("Error: Sorting Failed!");
 				}
 			}
 		});
@@ -113,17 +173,29 @@ public class GUI extends JFrame{
 		JLabel srcLbl = new JLabel("Search Target");		
 		
 		//Order matters here as the index is used by the internal methods.
-		cbx.addItem("Index");		
-		cbx.addItem("Name");
-		cbx.addItem("Type");
+		searchCbx.addItem("Index");		
+		searchCbx.addItem("Name");
+		searchCbx.addItem("Type");
+		
+		sortCbx.addItem("Name");
+		sortCbx.addItem("Age");
+		sortCbx.addItem("Height");
+		sortCbx.addItem("Weight");
+		sortCbx.addItem("Empathy");
+		sortCbx.addItem("Fear");
+		sortCbx.addItem("Carrying Capacity");
+		sortCbx.addItem("Value");
 		
 		JPanel panel = new JPanel();
 		panel.add(ld);
 		panel.add(dsp);
 		panel.add(tField);
 		panel.add(srcLbl);	
-		panel.add(cbx);
-		panel.add(src);	
+		panel.add(searchCbx);
+		panel.add(src);
+		panel.add(sortCbx);
+		panel.add(sortBtn);
+		
 		
 		add(panel, BorderLayout.PAGE_START);
 	}
@@ -137,6 +209,30 @@ public class GUI extends JFrame{
 		text.setText("Welcome to The Cave");
 		
 		add(pane, BorderLayout.CENTER);
+	}
+	
+	/**
+	 * Checks if a string is an integer by iterating through each character and checking if it's a digit.
+	 * @param string
+	 * @return boolean if string is a number.
+	 */
+	public boolean isNumber(String string) {
+		if (string.isEmpty()) return false;
+		
+		int i = 0;
+		
+		if (string.charAt(0) == '-') {
+			if (string.length() == 1) return false;
+			i = 1;
+		}
+		
+		for (; i < string.length(); i++) {
+			char c = string.charAt(i);
+			if (c < '0' || c > '9') return false;
+		}
+		
+		return true;
+				
 	}
 	
 	public static void main(String[] args) {
