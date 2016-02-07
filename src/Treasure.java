@@ -7,7 +7,7 @@
  * <li>Platform/Compiler: Java 8 with Eclipse IDE
  * <li>Instructor: Nicholas Duchon
  * <li>Purpose: Treasure class that extends GameObject and adds weight and value fields.
- * <li>Due: 1/24/2016
+ * <li>Due: 2/8/2016
  */
 public class Treasure extends CaveObject{
 	private double weight, value;
@@ -55,6 +55,13 @@ public class Treasure extends CaveObject{
 	 */
 	public double getWeight() {
 		return weight;
+	}
+	
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder(super.toString());
+		sb.insert(sb.length() - 1, ", " + this.getWeight() + ", " + this.getValue());
+		return sb.toString();		
 	}
 	
 }

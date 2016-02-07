@@ -11,7 +11,7 @@ import java.util.Comparator;
  * <li>Platform/Compiler: Java 8 with Eclipse IDE
  * <li>Instructor: Nicholas Duchon
  * <li>Purpose: Party class which holds a list of creatures and can perform search operations.
- * <li>Due: 1/24/2016
+ * <li>Due: 2/8/2016
  */
 public class Party extends CaveElement {
 	private ArrayList<Creature> creatures = new ArrayList<Creature>();
@@ -29,9 +29,9 @@ public class Party extends CaveElement {
 	}
 	
 	/**
-	 * First checks if this object is a match. Otherwise, it continues the search through the creatures.
+	 * First checks if this object is a match. Then, it continues the search through the creatures.
 	 * @param index
-	 * @return CaveElement
+	 * @return CaveElement Objects that matched the search criteria
 	 */
 	@Override
 	public ArrayList<CaveElement> searchIndex(int index) {
@@ -44,6 +44,11 @@ public class Party extends CaveElement {
 		return matched;
 	}
 	
+	/**
+	 * First checks if this object is a match. Then, it continues the search through the creatures.
+	 * @param target
+	 * @return CaveElement Objects that matched the search criteria
+	 */
 	@Override
 	public ArrayList<CaveElement> searchName(String target) {
 		ArrayList<CaveElement> matched = new ArrayList<CaveElement>();
@@ -55,6 +60,11 @@ public class Party extends CaveElement {
 		return matched;
 	}
 	
+	/**
+	 * First checks if this object is a match. Then, it continues the search through the creatures.
+	 * @param target
+	 * @return CaveElement Objects that matched the search criteria
+	 */
 	@Override
 	public ArrayList<CaveElement> searchType(String target) {
 		ArrayList<CaveElement> matched = new ArrayList<CaveElement>();
@@ -64,7 +74,7 @@ public class Party extends CaveElement {
 		}
 		return matched;
 	}
-	
+
 	public void sortName() {
 		Collections.sort(creatures, new Comparator<Creature>() {
 			@Override
@@ -132,7 +142,7 @@ public class Party extends CaveElement {
 	public String toString() {
 		StringBuilder sb = new StringBuilder(super.toString());
 		for (Creature c : creatures) {
-			sb.append("\n\t" + c);
+			sb.append("\n\t" + c + "\n");
 		}
 		
 		return sb.toString();

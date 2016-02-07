@@ -13,7 +13,7 @@ import javax.swing.*;
  * <li>Platform/Compiler: Java 8 with Eclipse IDE
  * <li>Instructor: Nicholas Duchon
  * <li>Purpose: Provides and graphical interface to the game. Executes main method.
- * <li>Due: 1/24/2016
+ * <li>Due: 2/8/2016
  */
 @SuppressWarnings("serial")
 public class GUI extends JFrame{
@@ -26,7 +26,7 @@ public class GUI extends JFrame{
 	public GUI(Cave cave) {
 		this.cave = cave;
 		setTitle("The Cave");
-		setSize(600,600);
+		setSize(800,600);
 		setLocationRelativeTo(null);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		setLayout(new BorderLayout());
@@ -40,6 +40,7 @@ public class GUI extends JFrame{
 	 */
 	private void setButtonPanel() {
 		
+		//Now opens in the program's directory.
 		JFileChooser fc = new JFileChooser(".");
 		
 		//Load button grabs a file and loads it into the cave object.
@@ -67,8 +68,7 @@ public class GUI extends JFrame{
 		});
 		
 		//Searches through the underlying structure for a match.
-		JButton src = new JButton("Search");
-		src.addActionListener(new ActionListener() {
+		ActionListener search = new ActionListener() {
 			public void actionPerformed (ActionEvent e) {
 				text.setText("");
 				try {
@@ -110,73 +110,33 @@ public class GUI extends JFrame{
 					System.out.println("ComboBox: " + searchCbx.getSelectedIndex());
 				}
 			}
-		});
+		};		
+
+		JButton searchBtn = new JButton("Search");
+		searchBtn.setToolTipText("Searches for matches based on drop down selection and text field");
+		JLabel searchLbl = new JLabel("Search Target");
 		
+		//Adds search action listener to when search button is pressed and when enter is pressed from the text field.
+		searchBtn.addActionListener(search);
+		tField.addActionListener(search);
+		
+		//Sort button
 		JButton sortBtn = new JButton("Sort");
 		sortBtn.addActionListener(new ActionListener() {
 			public void actionPerformed (ActionEvent e) {
-				switch (((String)sortCbx.getSelectedItem())) {
-				case "Name":
-					for (Party p : cave.getParties()) {
-						p.sortName();
-						for (Creature c : p.getCreatures()) {
-							c.sortName();
-						}
-					}
-					break;
-				case "Age":
-					for (Party p : cave.getParties()) {
-						p.sortAge();
-					}
-					break;
-				case "Height":
-					for (Party p : cave.getParties()) {
-						p.sortHeight();
-					}
-					break;
-				case "Weight":
-					for (Party p : cave.getParties()) {
-						p.sortWeight();
-						for (Creature c : p.getCreatures()) {
-							c.sortWeight();
-						}
-					}
-					break;
-				case "Empathy":
-					for (Party p : cave.getParties()) {
-						p.sortEmpathy();
-					}
-					break;
-				case "Fear":
-					for (Party p : cave.getParties()) {
-						p.sortFear();
-					}
-					break;
-				case "Carrying Capacity":
-					for (Party p : cave.getParties()) {
-						p.sortCarryCap();
-					}
-					break;				
-				case "Value":
-					for (Party p : cave.getParties()) {
-						for (Creature c : p.getCreatures()) {
-							c.sortValue();
-						}
-					}
-					break;
-				default:
-					text.setText("Error: Sorting Failed!");
-				}
+				sort(((String)sortCbx.getSelectedItem()));
+				text.setText(cave.toString());
 			}
 		});
+		sortBtn.setToolTipText("Sorts bases on drop down selection");		
 		
-		JLabel srcLbl = new JLabel("Search Target");		
-		
-		//Order matters here as the index is used by the internal methods.
+		//Order matters here as the index is used by the search method.
 		searchCbx.addItem("Index");		
 		searchCbx.addItem("Name");
 		searchCbx.addItem("Type");
+		searchCbx.setToolTipText("Select what to base search on");
 		
+		//Order does not matter here as the string objects are compared.
 		sortCbx.addItem("Name");
 		sortCbx.addItem("Age");
 		sortCbx.addItem("Height");
@@ -185,17 +145,17 @@ public class GUI extends JFrame{
 		sortCbx.addItem("Fear");
 		sortCbx.addItem("Carrying Capacity");
 		sortCbx.addItem("Value");
+		sortCbx.setToolTipText("Select what to base sorting on");
 		
 		JPanel panel = new JPanel();
 		panel.add(ld);
 		panel.add(dsp);
 		panel.add(tField);
-		panel.add(srcLbl);	
+		panel.add(searchLbl);	
 		panel.add(searchCbx);
-		panel.add(src);
+		panel.add(searchBtn);
 		panel.add(sortCbx);
-		panel.add(sortBtn);
-		
+		panel.add(sortBtn);		
 		
 		add(panel, BorderLayout.PAGE_START);
 	}
@@ -212,33 +172,60 @@ public class GUI extends JFrame{
 	}
 	
 	/**
-	 * Checks if a string is an integer by iterating through each character and checking if it's a digit.
+	 * Checks if a string is a positive integer by iterating through each character and checking if it's a digit.
 	 * @param string
 	 * @return boolean if string is a number.
 	 */
 	public boolean isNumber(String string) {
 		if (string.isEmpty()) return false;
 		
-		int i = 0;
+		int length = string.length();
 		
-		if (string.charAt(0) == '-') {
-			if (string.length() == 1) return false;
-			i = 1;
-		}
-		
-		for (; i < string.length(); i++) {
+		for (int i = 0; i < length; i++) {
 			char c = string.charAt(i);
 			if (c < '0' || c > '9') return false;
 		}
-		
-		return true;
-				
+		return true;				
+	}
+	
+	/**
+	 * Sorts the internal data structure based on the input string.
+	 * @param target
+	 */
+	public void sort(String target) {
+		switch (target) {
+		case "Name":
+			cave.sortName();
+			break;
+		case "Age":
+			cave.sortAge();
+			break;
+		case "Height":
+			cave.sortHeight();
+			break;
+		case "Weight":
+			cave.sortWeight();
+			break;
+		case "Empathy":
+			cave.sortEmpathy();
+			break;
+		case "Fear":
+			cave.sortFear();
+			break;
+		case "Carrying Capacity":
+			cave.sortCarryCap();
+			break;				
+		case "Value":
+			cave.sortValue();
+			break;
+		default:
+			text.setText("Error: Sorting Failed!");
+		}
 	}
 	
 	public static void main(String[] args) {
 		Cave cave = new Cave();
-		GUI gui = new GUI(cave);
-		
+		GUI gui = new GUI(cave);		
 	}
 	
 	

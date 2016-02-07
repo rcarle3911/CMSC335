@@ -7,7 +7,7 @@
  * <li>Platform/Compiler: Java 8 with Eclipse IDE
  * <li>Instructor: Nicholas Duchon
  * <li>Purpose: Basic GameObject class that holds an index, parentIndex, and type fields.
- * <li>Due: 1/24/2016
+ * <li>Due: 2/8/2016
  */
 public abstract class CaveObject extends CaveElement{
 	private int parentIndex;

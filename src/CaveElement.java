@@ -9,7 +9,7 @@ import java.util.ArrayList;
  * <li>Platform/Compiler: Java 8 with Eclipse IDE
  * <li>Instructor: Nicholas Duchon
  * <li>Purpose: CaveElement class is the parent class that all elements of the game derive from. Most importantly enforces everything has an index.
- * <li>Due: 1/24/2016
+ * <li>Due: 2/8/2016
  */
 public abstract class CaveElement {
 	private String name;
@@ -54,18 +54,33 @@ public abstract class CaveElement {
 		return type;
 	}
 	
+	/**
+	 * Default search method checks if this object is a match and returns an array of consisting of itself if true.
+	 * @param index
+	 * @return CaveElement Objects that matched the search criteria
+	 */
 	public ArrayList<CaveElement> searchIndex(int index) {
 		ArrayList<CaveElement> matched = new ArrayList<CaveElement>();
 		if (getIndex() == index) matched.add(this);
 		return matched;
 	}
 	
+	/**
+	 * Default search method checks if this object is a match and returns an array of consisting of itself if true.
+	 * @param target
+	 * @return CaveElement Objects that matched the search criteria
+	 */
 	public ArrayList<CaveElement> searchName(String target) {
 		ArrayList<CaveElement> matched = new ArrayList<CaveElement>();
 		if (getName().equals(target)) matched.add(this);
 		return matched;
 	}
 	
+	/**
+	 * Default search method checks if this object is a match and returns an array of consisting of itself if true.
+	 * @param target
+	 * @return CaveElement Objects that matched the search criteria
+	 */
 	public ArrayList<CaveElement> searchType(String target) {
 		ArrayList<CaveElement> matched = new ArrayList<CaveElement>();
 		if (getType().equals(target)) matched.add(this);

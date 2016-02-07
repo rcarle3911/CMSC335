@@ -11,11 +11,11 @@ import java.util.Comparator;
  * <li>Platform/Compiler: Java 8 with Eclipse IDE
  * <li>Instructor: Nicholas Duchon
  * <li>Purpose: Creature class which holds the characteristics of the creature and a list of artifacts and treasures.
- * <li>Due: 1/24/2016
+ * <li>Due: 2/8/2016
  */
 public class Creature extends CaveObject{
 	private int empathy, fear;
-	private double carryingCapacity, age, height, weight;
+	private double carryingCapacity, age = -1.0, height = -1.0, weight = -1.0;
 	private ArrayList<Treasure> treasures = new ArrayList<Treasure>();
 	private ArrayList<Artifact> artifacts = new ArrayList<Artifact>();
 	
@@ -91,6 +91,11 @@ public class Creature extends CaveObject{
 		this.weight = weight;
 	}
 	
+	/**
+	 * First checks if this object is a match. Then, it continues the search through the treasures and artifacts.
+	 * @param index
+	 * @return CaveElement Objects that matched the search criteria
+	 */
 	@Override
 	public ArrayList<CaveElement> searchIndex(int index) {
 		ArrayList<CaveElement> matched = new ArrayList<CaveElement>();
@@ -107,6 +112,11 @@ public class Creature extends CaveObject{
 		return matched;
 	}
 	
+	/**
+	 * First checks if this object is a match. Then, it continues the search through the treasures and artifacts.
+	 * @param target
+	 * @return CaveElement Objects that matched the search criteria
+	 */
 	@Override
 	public ArrayList<CaveElement> searchName(String target) {
 		ArrayList<CaveElement> matched = new ArrayList<CaveElement>();
@@ -122,6 +132,11 @@ public class Creature extends CaveObject{
 		return matched;
 	}
 	
+	/**
+	 * First checks if this object is a match. Then, it continues the search through the treasures and artifacts.
+	 * @param target
+	 * @return CaveElement Objects that matched the search criteria
+	 */
 	@Override
 	public ArrayList<CaveElement> searchType(String target) {
 		ArrayList<CaveElement> matched = new ArrayList<CaveElement>();
@@ -168,9 +183,11 @@ public class Creature extends CaveObject{
 	public String toString() { 
 		StringBuilder sb = new StringBuilder(super.toString());
 		sb.insert(1, getName() + ", ");
+		if (getAge() >= 0) sb.insert(sb.length() - 1, ", " + getAge());
+		if (getHeight() >= 0) sb.insert(sb.length() - 1, ", " + getHeight());
+		if (getWeight() >= 0) sb.insert(sb.length() - 1, ", " + getWeight());
 		if (!artifacts.isEmpty()) sb.append("\n\tArtifacts: " + artifacts.toString());
 		if (!treasures.isEmpty()) sb.append("\n\tTreasures: " + treasures.toString());
-		sb.append('\n');
 		return sb.toString();
 	}
 }

@@ -1,6 +1,8 @@
 import java.io.File;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Scanner;
 
@@ -13,7 +15,7 @@ import java.util.Scanner;
  * <li>Platform/Compiler: Java 8 with Eclipse IDE
  * <li>Instructor: Nicholas Duchon
  * <li>Purpose: Cave class which holds the parties and loads a data file.
- * <li>Due: 1/24/2016
+ * <li>Due: 2/8/2016
  */
 public class Cave {
 	private ArrayList<Party> parties = new ArrayList<Party>();
@@ -31,7 +33,8 @@ public class Cave {
 	
 	/**
 	 * Iterates line by line through the input file. The first character of the line determines how it's processed.
-	 * @param file
+	 * Uses a hashmap to collect all objects read in.
+	 * @param file 
 	 */
 	public void loadFile(File file) {
 		try {
@@ -92,6 +95,7 @@ public class Cave {
 	/**
 	 * Takes a line of inputs in a specific format, splits it, and creates a new Party object. Adds it to the collection.
 	 * @param line String of inputs
+	 * @param hm Hashmap of objects read in
 	 */
 	private void addParty(String line, HashMap<Integer, CaveElement> hm) {
 		ArrayDeque<String> queue = splitLine(line);
@@ -112,6 +116,7 @@ public class Cave {
 	/**
 	 * Splits input string into a queue and builds a Creature with it. Adds this to the party indicated by parentIndex.
 	 * @param line
+	 * @param hm Hashmap of objects read in
 	 */
 	private void addCreature(String line, HashMap<Integer, CaveElement> hm) {
 		try {
@@ -133,9 +138,7 @@ public class Cave {
 						c.setWeight(Double.parseDouble(queue.poll()));
 					}
 				}
-			}
-			
-			
+			}			
 			
 			hm.put(c.getIndex(), c);
 			
@@ -166,7 +169,7 @@ public class Cave {
 			ArrayList<CaveElement> array = searchIndex(c.getParentIndex());
 			if (array.isEmpty()) looseObj.add(c);
 			else {
-				CaveElement p = searchIndex(c.getParentIndex()).get(0);
+				CaveElement p = array.get(0);
 				if (p instanceof Party) {
 					((Party) p).addCreature(c);
 				} else {
@@ -176,12 +179,13 @@ public class Cave {
 			
 		} else {
 			looseObj.add(c);
-		}		
+		}
 	}
 	
 	/**
 	 * Splits the input string into a queue and uses that to build a Treasure object. Adds this to the creature indicated by parentIndex.
 	 * @param line
+	 * @param hm Hashmap of objects read in
 	 */
 	private void addTreasure(String line, HashMap<Integer, CaveElement> hm) {
 		try {
@@ -217,12 +221,15 @@ public class Cave {
 	 */
 	public void addTreasure(Treasure t) throws Exception {
 		if (t.getParentIndex() != 0) {
-			CaveElement c = searchIndex(t.getParentIndex()).get(0);
-						
-			if (c instanceof Creature) {
-				((Creature) c).addTreasure(t);
-			} else {
-				throw new Exception("Invalid parent index at treasure: " + t.toString());
+			ArrayList <CaveElement> array = searchIndex(t.getParentIndex());
+			if (array.isEmpty()) looseObj.add(t);
+			else {
+				CaveElement c = array.get(0);
+				if (c instanceof Creature) {
+					((Creature) c).addTreasure(t);
+				} else {
+					throw new Exception("Invalid parent index at treasure: " + t.toString());
+				}				
 			}
 			
 		} else {
@@ -235,6 +242,7 @@ public class Cave {
 	/**
 	 * Takes a specifically formatted string input and splits into a queue. It uses this to make an Artifact object.
 	 * @param line
+	 * @param hm Hashmap of objects read in
 	 */
 	private void addArtifact(String line, HashMap<Integer, CaveElement> hm) {		
 		try {
@@ -272,13 +280,17 @@ public class Cave {
 	public void addArtifact(Artifact a) throws Exception {
 	
 		if (a.getParentIndex() != 0) {
-			CaveElement c = searchIndex(a.getParentIndex()).get(0);
-			
-			if (c instanceof Creature) {
-				((Creature) c).addArtifact(a);
-			} else {
-				throw new Exception("Invalid creature index at artifact: " + a.toString());
+			ArrayList<CaveElement> array = searchIndex(a.getParentIndex());
+			if (array.isEmpty()) looseObj.add(a);
+			else {
+				CaveElement c = array.get(0);
+				if (c instanceof Creature) {
+					((Creature) c).addArtifact(a);
+				} else {
+					throw new Exception("Invalid creature index at artifact: " + a.toString());
+				}
 			}
+
 		} else {
 			looseObj.add(a);
 		}	
@@ -297,9 +309,9 @@ public class Cave {
 	}
 	
 	/**
-	 * Iterates through every object in the game until a match is found.
+	 * Iterates through every object in the game and collects all matches.
 	 * @param index
-	 * @return
+	 * @return Array of CaveElements with the given index.
 	 */
 	public ArrayList<CaveElement> searchIndex(int index) {
 		ArrayList<CaveElement> matched = new ArrayList<CaveElement>();
@@ -315,6 +327,11 @@ public class Cave {
 		return matched;
 	}
 	
+	/**
+	 * Iterates through every object in the game and collects all matches.
+	 * @param target
+	 * @return Array of CaveElements with the given name.
+	 */
 	public ArrayList<CaveElement> searchName(String target) {
 		ArrayList<CaveElement> matched = new ArrayList<CaveElement>();	
 		
@@ -329,6 +346,11 @@ public class Cave {
 		return matched;
 	}
 	
+	/**
+	 * Iterates through every object in the game and collects all matches.
+	 * @param target
+	 * @return Array of CaveElements with the given type.
+	 */
 	public ArrayList<CaveElement> searchType(String target) {
 		ArrayList<CaveElement> matched = new ArrayList<CaveElement>();	
 		
@@ -348,6 +370,69 @@ public class Cave {
 	
 	public ArrayList<CaveObject> getLooseObj() {
 		return looseObj;
+	}
+	
+	public void sortName() {
+		Collections.sort(parties, new Comparator<Party>() {
+			@Override
+			public int compare(Party p1, Party p2) {				
+				return p1.getName().compareTo(p2.getName());
+			}
+		});
+		
+		for (Party p : parties) {
+			p.sortName();
+			for (Creature c : p.getCreatures()) {
+				c.sortName();
+			}
+		}
+	}
+	
+	public void sortAge() {
+		for (Party p : parties) {
+			p.sortAge();
+		}
+	}
+	
+	public void sortHeight() {
+		for (Party p : parties) {
+			p.sortHeight();
+		}
+	}
+	
+	public void sortWeight() {
+		for (Party p : parties) {
+			p.sortWeight();
+			for (Creature c : p.getCreatures()) {
+				c.sortWeight();
+			}
+		}
+	}
+	
+	public void sortEmpathy() {
+		for (Party p : parties) {
+			p.sortEmpathy();
+		}
+	}
+	
+	public void sortFear() {
+		for (Party p : parties) {
+			p.sortFear();
+		}
+	}
+	
+	public void sortCarryCap() {
+		for (Party p : parties) {
+			p.sortCarryCap();
+		}
+	}
+	
+	public void sortValue() {
+		for (Party p : parties) {
+			for (Creature c : p.getCreatures()) {
+				c.sortValue();
+			}
+		}
 	}
 	
 	/**

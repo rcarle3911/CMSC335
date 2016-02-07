@@ -7,7 +7,7 @@
  * <li>Platform/Compiler: Java 8 with Eclipse IDE
  * <li>Instructor: Nicholas Duchon
  * <li>Purpose: Artifact class that is extending but not adding anything to GameObject.
- * <li>Due: 1/24/2016
+ * <li>Due: 2/8/2016
  */
 public class Artifact extends CaveObject{
 	
@@ -19,6 +19,16 @@ public class Artifact extends CaveObject{
 	 */
 	public Artifact(int index, String type, int creatureIndex) {
 		super(index, type, creatureIndex);
+	}
+	
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder(super.toString());
+		if (this.getName().equals("")) return sb.toString();
+		else {
+			sb.insert(sb.length() - 1, ", " + this.getName());
+			return sb.toString();
+		}
 	}
 	
 }
