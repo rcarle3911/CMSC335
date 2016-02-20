@@ -1,15 +1,19 @@
 /**
  * <li>FileName: Artifact.java
  * <li>Class: CMSC 335 6380 Object-Oriented and Concurrent Programming
- * <li>Project 2
+ * <li>Project 3
  * <li>Author: Robert Lee Carle
- * <li>Date: 1/11/2016
+ * <li>Date: 2/8/2016
  * <li>Platform/Compiler: Java 8 with Eclipse IDE
  * <li>Instructor: Nicholas Duchon
- * <li>Purpose: Artifact class that is extending but not adding anything to GameObject.
- * <li>Due: 2/8/2016
+ * <li>Purpose: Artifact class.
+ * <li>Due: 2/22/2016
  */
-public class Artifact extends CaveObject{
+public class Artifact extends CaveElement{
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1234L;
 	
 	/**
 	 * Constructor for an artifact.
@@ -17,18 +21,16 @@ public class Artifact extends CaveObject{
 	 * @param type String representation of the artifact's type i.e. wand, potion etc.
 	 * @param creatureIndex Index of owning creature
 	 */
-	public Artifact(int index, String type, int creatureIndex) {
-		super(index, type, creatureIndex);
+	public Artifact(int index, String type) {
+		super(index, "", type);
 	}
 	
 	@Override
 	public String toString() {
-		StringBuilder sb = new StringBuilder(super.toString());
-		if (this.getName().equals("")) return sb.toString();
-		else {
-			sb.insert(sb.length() - 1, ", " + this.getName());
-			return sb.toString();
-		}
+		StringBuilder sb = new StringBuilder();
+		sb.append(getType() + ", " + getIndex());
+		if (!getName().equals("")) sb.insert(0, getName() + ", ");
+		return sb.toString();		
 	}
 	
 }

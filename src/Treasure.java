@@ -1,15 +1,19 @@
 /**
  * <li>FileName: Treasure.java
  * <li>Class: CMSC 335 6380 Object-Oriented and Concurrent Programming
- * <li>Project 2
+ * <li>Project 3
  * <li>Author: Robert Lee Carle
- * <li>Date: 1/11/2016
+ * <li>Date: 2/8/2016
  * <li>Platform/Compiler: Java 8 with Eclipse IDE
  * <li>Instructor: Nicholas Duchon
- * <li>Purpose: Treasure class that extends GameObject and adds weight and value fields.
- * <li>Due: 2/8/2016
+ * <li>Purpose: Treasure class a CaveObject that holds weight and value fields.
+ * <li>Due: 2/22/2016
  */
-public class Treasure extends CaveObject{
+public class Treasure extends CaveElement{
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1234L;
 	private double weight, value;
 	
 	/**
@@ -19,8 +23,8 @@ public class Treasure extends CaveObject{
 	 * @param type String representation of the treasure's type i.e. gold, gems etc.
 	 * @param weight Weight of the treasure as a double.
 	 */
-	public Treasure(int index, String type, int parentIndex, double weight, double value) {
-		super(index, type, parentIndex);		
+	public Treasure(int index, String type, double weight, double value) {
+		super(index, "", type);		
 		setWeight(weight);
 		setValue(value);
 	}
@@ -59,9 +63,7 @@ public class Treasure extends CaveObject{
 	
 	@Override
 	public String toString() {
-		StringBuilder sb = new StringBuilder(super.toString());
-		sb.insert(sb.length() - 1, ", " + this.getWeight() + ", " + this.getValue());
-		return sb.toString();		
+		return (getType() + ", " + getIndex() + ", " + this.getWeight() + ", " + this.getValue());
 	}
 	
 }

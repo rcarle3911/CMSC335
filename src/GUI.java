@@ -1,27 +1,40 @@
 import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.EventQueue;
+import java.awt.GridLayout;
 import java.awt.event.*;
 import java.util.ArrayList;
+import java.util.Vector;
 
 import javax.swing.*;
+import javax.swing.tree.*;
 
 /**
  * <li>FileName: GUI.java
  * <li>Class: CMSC 335 6380 Object-Oriented and Concurrent Programming
- * <li>Project 2
+ * <li>Project 3
  * <li>Author: Robert Lee Carle
- * <li>Date: 1/11/2016
+ * <li>Date: 2/8/2016
  * <li>Platform/Compiler: Java 8 with Eclipse IDE
  * <li>Instructor: Nicholas Duchon
  * <li>Purpose: Provides and graphical interface to the game. Executes main method.
- * <li>Due: 2/8/2016
+ * <li>Due: 2/22/2016
  */
-@SuppressWarnings("serial")
 public class GUI extends JFrame{
+	/**
+	 * Default Serial
+	 */
+	private static final long serialVersionUID = 1234L;
 	private Cave cave;
 	private JTextArea text = new JTextArea(10,10);
 	private JComboBox <String> searchCbx = new JComboBox <String>();
 	private JComboBox <String> sortCbx = new JComboBox <String>();
 	private JTextField tField = new JTextField(10);
+	private JPanel jobPanel = new JPanel();
+	private JTabbedPane tabPane = new JTabbedPane();
+	DefaultTreeModel model;
+	JTree tree;
+
 	
 	public GUI(Cave cave) {
 		this.cave = cave;
@@ -30,8 +43,19 @@ public class GUI extends JFrame{
 		setLocationRelativeTo(null);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		setLayout(new BorderLayout());
+		
+		JPanel tabPanel = new JPanel(new GridLayout(1,1));
+		tabPanel.add(tabPane);
+		tabPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+		
+		tabPane.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
+		add(tabPanel, BorderLayout.CENTER);
+			
 		setButtonPanel();
 		setTextArea();
+		setTreeArea();
+		setJobArea();	
+			
 		setVisible(true);
 	}
 	
@@ -52,9 +76,9 @@ public class GUI extends JFrame{
 				//If the users clicked open, then proceed.
 				if (fcReturn == JFileChooser.APPROVE_OPTION) {
 					text.setText("Loading " + fc.getSelectedFile().getName() + "\n");
-					cave.loadFile(fc.getSelectedFile());
+					cave.loadFile(fc.getSelectedFile(), jobPanel, model);
+					model.setRoot(cave);
 					text.append("File loaded");
-					
 				}				
 			}
 		});
@@ -72,7 +96,7 @@ public class GUI extends JFrame{
 			public void actionPerformed (ActionEvent e) {
 				text.setText("");
 				try {
-					ArrayList<CaveElement> matches = new ArrayList<CaveElement>();
+					Vector<CaveElement> matches = new Vector<CaveElement>();
 					switch (searchCbx.getSelectedIndex()) {
 					
 					case 0: 
@@ -164,11 +188,37 @@ public class GUI extends JFrame{
 	 * Sets the text area to default.
 	 */
 	private void setTextArea() {
+	
 		text.setLineWrap(true);
 		JScrollPane pane = new JScrollPane(text);
 		text.setText("Welcome to The Cave");
 		
-		add(pane, BorderLayout.CENTER);
+		tabPane.addTab("Text Area", pane);
+	}
+	
+	/**
+	 * Sets the text area to default.
+	 */
+	private void setTreeArea() {
+		model = new DefaultTreeModel(cave);
+		tree = new JTree(model);		
+		
+		JScrollPane pane = new JScrollPane(tree);		
+		
+		//add(pane, BorderLayout.CENTER);
+		
+		tabPane.add("Trea Area", pane);
+		
+	}
+	
+	private void setJobArea() {
+		jobPanel.setLayout(new GridLayout(0,1));
+		jobPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+		
+		JScrollPane pane = new JScrollPane(jobPanel);
+		
+		pane.setAlignmentX(Component.LEFT_ALIGNMENT);
+		tabPane.add("Job Area", pane);
 	}
 	
 	/**
@@ -221,11 +271,22 @@ public class GUI extends JFrame{
 		default:
 			text.setText("Error: Sorting Failed!");
 		}
+		
+		model.reload();
 	}
 	
 	public static void main(String[] args) {
-		Cave cave = new Cave();
-		GUI gui = new GUI(cave);		
+		EventQueue.invokeLater(new Runnable() {
+			@Override public void run() {
+				Cave cave = new Cave("Sorcerer's Cave");
+				GUI gui = new GUI(cave);
+				MyRenderer renderer = new MyRenderer();
+				gui.tree.setCellRenderer(renderer);
+				//gui.tree.setEditable(true);
+				//gui.tree.setCellEditor(new MyEditor(gui.tree, renderer));
+			}
+		});
+		
 	}
 	
 	

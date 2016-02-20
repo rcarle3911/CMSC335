@@ -1,42 +1,53 @@
+import java.awt.Component;
 import java.io.File;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Scanner;
+import java.util.Vector;
+
+import javax.swing.JPanel;
+import javax.swing.JTree;
+import javax.swing.tree.*;
 
 /**
  * <li>FileName: Cave.java
  * <li>Class: CMSC 335 6380 Object-Oriented and Concurrent Programming
- * <li>Project 2
+ * <li>Project 3
  * <li>Author: Robert Lee Carle
- * <li>Date: 1/11/2016
+ * <li>Date: 2/8/2016
  * <li>Platform/Compiler: Java 8 with Eclipse IDE
  * <li>Instructor: Nicholas Duchon
  * <li>Purpose: Cave class which holds the parties and loads a data file.
- * <li>Due: 2/8/2016
+ * <li>Due: 2/22/2016
  */
-public class Cave {
-	private ArrayList<Party> parties = new ArrayList<Party>();
-	private ArrayList<CaveObject> looseObj = new ArrayList<CaveObject>();
-	
-	public Cave() {}
+public class Cave extends CaveElement{	
 	
 	/**
-	 * Creates a cave object by loading the input file into the underlying data structure
-	 * @param file
+	 * 
 	 */
-	public Cave(File file) {
-		loadFile(file);
-	}
+	private static final long serialVersionUID = 1234L;
 	
+	//private ArrayList<CaveElement> children = new ArrayList<CaveElement>();
+	//private ArrayList<CaveElement> parties = new ArrayList<CaveElement>();
+	//private ArrayList<CaveElement> looseObj = new ArrayList<CaveElement>();
+	
+	public Cave(String name) {
+		super(-1, name);
+		
+		add(new CaveElement(-1, "Parties"));
+		add(new CaveElement(-1, "Loose Objects"));
+	}	
+
 	/**
 	 * Iterates line by line through the input file. The first character of the line determines how it's processed.
 	 * Uses a hashmap to collect all objects read in.
 	 * @param file 
 	 */
-	public void loadFile(File file) {
+	public void loadFile(File file, JPanel jobPanel, DefaultTreeModel model) {
 		try {
 			HashMap<Integer, CaveElement> hm = new HashMap<Integer, CaveElement>();
 			Scanner s = new Scanner(file);
@@ -60,7 +71,7 @@ public class Cave {
 					addArtifact(line, hm);
 					break;
 				case 'j':
-					addJob(line, hm);
+					addJob(line, hm, jobPanel, model);
 					break;
 				default:
 					throw new Exception("Incorrect Format");
@@ -110,7 +121,7 @@ public class Cave {
 	 * @param p Party object
 	 */
 	public void addParty(Party p) {		
-		parties.add(p);
+		((CaveElement) getChildAt(0)).add(p);
 	}
 	
 	/**
@@ -121,14 +132,16 @@ public class Cave {
 	private void addCreature(String line, HashMap<Integer, CaveElement> hm) {
 		try {
 			ArrayDeque<String> queue = splitLine(line);
-			Creature c = new Creature(
-					Integer.parseInt(queue.poll()), 				//index
-					queue.poll(),									//type
-					queue.poll(),									//name
-					Integer.parseInt(queue.poll()),					//parent index
-					Integer.parseInt(queue.poll()),					//empathy
-					Integer.parseInt(queue.poll()),					//fear
-					Double.parseDouble(queue.poll()));				//carrying capacity
+			
+			int index =	Integer.parseInt(queue.poll()); 				//index
+			String type = queue.poll();									//type
+			String name = queue.poll();									//name
+			CaveElement parent = hm.get(Integer.parseInt(queue.poll()));			//parent
+			int emp = Integer.parseInt(queue.poll());					//empathy
+			int fear = Integer.parseInt(queue.poll());					//fear
+			double carryCap = Double.parseDouble(queue.poll());				//carrying capacity
+			
+			Creature c = new Creature(index, type, name, emp, fear, carryCap);
 			
 			if (!queue.isEmpty()) {
 				c.setAge(Double.parseDouble(queue.poll()));
@@ -142,16 +155,8 @@ public class Cave {
 			
 			hm.put(c.getIndex(), c);
 			
-			if (c.getParentIndex() != 0) {
-				CaveElement p = hm.get(c.getParentIndex());
-				if (p instanceof Party) {
-					((Party) p).addCreature(c);
-				} else {
-					throw new Exception("Invalid parent index at creature: " + c.toString());
-				}
-			} else {
-				looseObj.add(c);
-			}
+			if (parent != null) parent.add(c);
+			else addCreature(c);
 			
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -165,20 +170,15 @@ public class Cave {
 	 * @throws Exception
 	 */
 	public void addCreature(Creature c) throws Exception {		
-		if (c.getParentIndex() != 0) {
-			ArrayList<CaveElement> array = searchIndex(c.getParentIndex());
-			if (array.isEmpty()) looseObj.add(c);
-			else {
-				CaveElement p = array.get(0);
-				if (p instanceof Party) {
-					((Party) p).addCreature(c);
-				} else {
-					throw new Exception("Invalid parent index at creature: " + c.toString());
-				}
+		if (c.getParent() != null) {
+			CaveElement p = c.getParent();
+			if (p instanceof Party) {
+				((Party) p).addCreature(c);
+			} else {
+				throw new Exception("Invalid parent index at creature: " + c.toString());
 			}
-			
 		} else {
-			looseObj.add(c);
+			((CaveElement) getChildAt(1)).add(c); //Adds to loose objects
 		}
 	}
 	
@@ -190,23 +190,18 @@ public class Cave {
 	private void addTreasure(String line, HashMap<Integer, CaveElement> hm) {
 		try {
 			ArrayDeque<String> queue = splitLine(line);
-			Treasure t = new Treasure(
-					Integer.parseInt(queue.poll()),		//index
-					queue.poll(),						//type
-					Integer.parseInt(queue.poll()),		//parent index
-					Double.parseDouble(queue.poll()),	//weight
-					Double.parseDouble(queue.poll()));	//value			
 			
-			if (t.getParentIndex() != 0) {
-				CaveElement c = hm.get(t.getParentIndex());
-				if (c instanceof Creature) {
-					((Creature) c).addTreasure(t);
-				} else {
-					throw new Exception("Invalid parent index at treasure: " + t.toString());
-				}
-			} else {
-				looseObj.add(t);
-			}
+			int index = Integer.parseInt(queue.poll());			//index
+			String type = queue.poll();							//type
+			CaveElement parent = hm.get(Integer.parseInt(queue.poll()));	//parent
+			double weight = Double.parseDouble(queue.poll());		//weight
+			double value = Double.parseDouble(queue.poll());		//value
+			
+			Treasure t = new Treasure(index, type, weight, value);
+			
+			if (parent != null) ((Creature) parent).addTreasure(t);
+			else addTreasure(t);
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}		
@@ -220,23 +215,16 @@ public class Cave {
 	 * @throws Exception
 	 */
 	public void addTreasure(Treasure t) throws Exception {
-		if (t.getParentIndex() != 0) {
-			ArrayList <CaveElement> array = searchIndex(t.getParentIndex());
-			if (array.isEmpty()) looseObj.add(t);
-			else {
-				CaveElement c = array.get(0);
-				if (c instanceof Creature) {
-					((Creature) c).addTreasure(t);
-				} else {
-					throw new Exception("Invalid parent index at treasure: " + t.toString());
-				}				
+		if (t.getParent() != null) {
+			CaveElement c = t.getParent();
+			if (c instanceof Creature) {
+				((Creature) c).addTreasure(t);
+			} else {
+				throw new Exception("Invalid parent index at treasure: " + t.toString());
 			}
-			
 		} else {
-			looseObj.add(t);
-		}
-		
-		
+			((CaveElement) getChildAt(1)).add(t); //Adds to loose objects
+		}			
 	}
 	
 	/**
@@ -247,23 +235,16 @@ public class Cave {
 	private void addArtifact(String line, HashMap<Integer, CaveElement> hm) {		
 		try {
 			ArrayDeque<String> queue = splitLine(line);
-			Artifact a = new Artifact(
-					Integer.parseInt(queue.poll()),		//index
-					queue.poll(),						//type
-					Integer.parseInt(queue.poll()));	//parent index
+			
+			int index = Integer.parseInt(queue.poll());				//index
+			String type = queue.poll();								//type
+			CaveElement parent = hm.get(Integer.parseInt(queue.poll()));	//parent
+			
+			Artifact a = new Artifact(index, type);
 			
 			if (!queue.isEmpty()) a.setName(queue.poll());
-			
-			if (a.getParentIndex() != 0) {
-				CaveElement c = hm.get(a.getParentIndex());
-				if (c instanceof Creature) {
-					((Creature) c).addArtifact(a);
-				} else {
-					throw new Exception("Invalid parent index at treasure: " + a.toString());
-				}
-			} else {
-				looseObj.add(a);
-			}			
+			if (parent != null) ((Creature) parent).addArtifact(a);
+			else addArtifact(a);
 			
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -279,52 +260,53 @@ public class Cave {
 	 */
 	public void addArtifact(Artifact a) throws Exception {
 	
-		if (a.getParentIndex() != 0) {
-			ArrayList<CaveElement> array = searchIndex(a.getParentIndex());
-			if (array.isEmpty()) looseObj.add(a);
-			else {
-				CaveElement c = array.get(0);
-				if (c instanceof Creature) {
-					((Creature) c).addArtifact(a);
-				} else {
-					throw new Exception("Invalid creature index at artifact: " + a.toString());
-				}
+		if (a.getParent() != null) {
+			CaveElement c = a.getParent();
+			if (c instanceof Creature) {
+				((Creature) c).addArtifact(a);
+			} else {
+				throw new Exception("Invalid parent index at treasure: " + a.toString());
 			}
-
 		} else {
-			looseObj.add(a);
-		}	
+			((CaveElement) getChildAt(1)).add(a); //Adds to loose objects
+		}			
 	}
 	
-	private void addJob(String line, HashMap<Integer, CaveElement> hm) {
-		
-	}
-	
-	/**
-	 * Removes a game element based on its index.
-	 * @param index
-	 */
-	public void remove(int index) {
-		parties.remove(searchIndex(index));
-	}
+	private void addJob(String line, HashMap<Integer, CaveElement> hm, JPanel jobPanel, DefaultTreeModel model) {
+		try {
+			ArrayDeque<String> queue = splitLine(line);
+			
+			int index = Integer.parseInt(queue.poll());			//index
+			String name = queue.poll();								//name
+			CaveElement parent = hm.get(Integer.parseInt(queue.poll()));		//parent
+			Long jobTime = Long.parseLong(queue.poll());				//job time
+			
+			Job job = new Job(index, name, jobTime, model);
+			
+			while (!queue.isEmpty()) {
+				job.addReq(queue.poll(), Integer.parseInt(queue.poll()));
+			}	
+			
+			parent.add(job);			
+			job.startJob();
+			
+			jobPanel.add(job.getPBar());
+			jobPanel.setAlignmentX(JPanel.LEFT_ALIGNMENT);
+			
+		} catch (Exception e) {
+			
+		}
+	}	
 	
 	/**
 	 * Iterates through every object in the game and collects all matches.
 	 * @param index
 	 * @return Array of CaveElements with the given index.
 	 */
-	public ArrayList<CaveElement> searchIndex(int index) {
-		ArrayList<CaveElement> matched = new ArrayList<CaveElement>();
-		
-		for (Party p : parties) {
-			matched.addAll(p.searchIndex(index));
-		}
-		
-		for (CaveElement ce : looseObj) {
-			matched.addAll(ce.searchIndex(index));
-		}
-		
-		return matched;
+	public Vector<CaveElement> searchIndex(int index) {
+		Vector<CaveElement> matched = ((CaveElement) getChildAt(0)).searchIndex(index);
+		matched.addAll(((CaveElement) getChildAt(1)).searchIndex(index));
+		return matched;		
 	}
 	
 	/**
@@ -332,18 +314,10 @@ public class Cave {
 	 * @param target
 	 * @return Array of CaveElements with the given name.
 	 */
-	public ArrayList<CaveElement> searchName(String target) {
-		ArrayList<CaveElement> matched = new ArrayList<CaveElement>();	
-		
-		for (Party p : parties) {
-			matched.addAll(p.searchName(target));
-		}
-		
-		for (CaveElement ce : looseObj) {
-			matched.addAll(ce.searchName(target));
-		}
-		
-		return matched;
+	public Vector<CaveElement> searchName(String target) {
+		Vector<CaveElement> matched = ((CaveElement) getChildAt(0)).searchName(target);
+		matched.addAll(((CaveElement) getChildAt(1)).searchName(target));
+		return matched;		
 	}
 	
 	/**
@@ -351,101 +325,91 @@ public class Cave {
 	 * @param target
 	 * @return Array of CaveElements with the given type.
 	 */
-	public ArrayList<CaveElement> searchType(String target) {
-		ArrayList<CaveElement> matched = new ArrayList<CaveElement>();	
-		
-		for (Party p : parties) {
-			matched.addAll(p.searchType(target));
-		}
-		
-		for (CaveElement ce : looseObj) {
-			matched.addAll(ce.searchType(target));
-		}
+	public Vector<CaveElement> searchType(String target) {
+		Vector<CaveElement> matched = ((CaveElement) getChildAt(0)).searchType(target);
+		matched.addAll(((CaveElement) getChildAt(1)).searchType(target));
 		return matched;
 	}
 	
-	public ArrayList<Party> getParties() {
-		return parties;
+	public Vector<CaveElement> getParties() {
+		return ((CaveElement) getChildAt(0)).getChildren();
 	}
 	
-	public ArrayList<CaveObject> getLooseObj() {
-		return looseObj;
+	public Vector<CaveElement> getLooseObj() {
+		return ((CaveElement) getChildAt(1)).getChildren();
 	}
 	
 	public void sortName() {
-		Collections.sort(parties, new Comparator<Party>() {
+		Collections.sort(getParties(), new Comparator<CaveElement>() {
 			@Override
-			public int compare(Party p1, Party p2) {				
+			public int compare(CaveElement p1, CaveElement p2) {				
 				return p1.getName().compareTo(p2.getName());
 			}
 		});
 		
-		for (Party p : parties) {
-			p.sortName();
-			for (Creature c : p.getCreatures()) {
-				c.sortName();
+		for (CaveElement p : getParties()) {
+			((Party) p).sortName();
+			for (CaveElement c : ((Party) p).getCreatures()) {
+				((Creature) c).sortName();
 			}
 		}
 	}
 	
 	public void sortAge() {
-		for (Party p : parties) {
-			p.sortAge();
+		for (CaveElement p : getParties()) {
+			((Party) p).sortAge();
 		}
 	}
 	
 	public void sortHeight() {
-		for (Party p : parties) {
-			p.sortHeight();
+		for (CaveElement p : getParties()) {
+			((Party) p).sortHeight();
 		}
 	}
 	
 	public void sortWeight() {
-		for (Party p : parties) {
-			p.sortWeight();
-			for (Creature c : p.getCreatures()) {
-				c.sortWeight();
+		for (CaveElement p : getParties()) {
+			((Party) p).sortWeight();
+			for (CaveElement c : ((Party) p).getCreatures()) {
+				((Creature) c).sortWeight();
 			}
 		}
 	}
 	
 	public void sortEmpathy() {
-		for (Party p : parties) {
-			p.sortEmpathy();
+		for (CaveElement p : getParties()) {
+			((Party) p).sortEmpathy();
 		}
 	}
 	
 	public void sortFear() {
-		for (Party p : parties) {
-			p.sortFear();
+		for (CaveElement p : getParties()) {
+			((Party) p).sortFear();
 		}
 	}
 	
 	public void sortCarryCap() {
-		for (Party p : parties) {
-			p.sortCarryCap();
+		for (CaveElement p : getParties()) {
+			((Party) p).sortCarryCap();
 		}
 	}
 	
 	public void sortValue() {
-		for (Party p : parties) {
-			for (Creature c : p.getCreatures()) {
-				c.sortValue();
+		for (CaveElement p : getParties()) {
+			for (CaveElement c : ((Party) p).getCreatures()) {
+				((Creature) c).sortValue();
 			}
 		}
 	}
-	
-	/**
-	 * Prints each party with the name and index. Each creature's name, type, and index belonging to the party is printed below and tabbed over.
-	 * Each treasure and artifact's type and index is printed below the creature it belongs to.
-	 */
+
 	@Override
-	public String toString() {
-		StringBuilder sb = new StringBuilder();
-		for (Party p : parties) {
-			sb.append(p + "\n");
-		}
-		if (!looseObj.isEmpty()) sb.append("Loose Objects:\n" + looseObj.toString());
-		return sb.toString();
+	public boolean getAllowsChildren() {
+		// TODO Auto-generated method stub
+		return true;
+	}
+
+	@Override
+	public CaveElement getParent() {
+		return null;
 	}
 }

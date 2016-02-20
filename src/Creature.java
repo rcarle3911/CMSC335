@@ -1,38 +1,53 @@
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Vector;
 
 /**
  * <li>FileName: Creature.java
  * <li>Class: CMSC 335 6380 Object-Oriented and Concurrent Programming
- * <li>Project 2
+ * <li>Project 3
  * <li>Author: Robert Lee Carle
- * <li>Date: 1/11/2016
+ * <li>Date: 2/8/2016
  * <li>Platform/Compiler: Java 8 with Eclipse IDE
  * <li>Instructor: Nicholas Duchon
  * <li>Purpose: Creature class which holds the characteristics of the creature and a list of artifacts and treasures.
- * <li>Due: 2/8/2016
+ * <li>Due: 2/22/2016
  */
-public class Creature extends CaveObject{
+public class Creature extends CaveElement{
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1234L;
 	private int empathy, fear;
 	private double carryingCapacity, age = -1.0, height = -1.0, weight = -1.0;
-	private ArrayList<Treasure> treasures = new ArrayList<Treasure>();
-	private ArrayList<Artifact> artifacts = new ArrayList<Artifact>();
+	private boolean busyFlag = false;
+	private Job job = null;
+
+//	private ArrayList<Treasure> treasures = new ArrayList<Treasure>();
+//	private ArrayList<Artifact> artifacts = new ArrayList<Artifact>();
 	
 
-	public Creature(int index, String type, String name, int partyIndex, int empathy, int fear, double carryingCapacity) {
-		super(index, type, partyIndex, name);
+	public Creature(int index, String type, String name, int empathy, int fear, double carryingCapacity) {
+		super(index, name, type);
 		setEmpathy(empathy);
 		setFear(fear);
 		setCarryCap(carryingCapacity);
+		
+		add (new CaveElement(-1, "Treasures"));
+		add (new CaveElement(-1, "Artifacts"));
 	}
 	
 	public void addTreasure(Treasure t) {
-		treasures.add(t);
+		((CaveElement) getChildAt(0)).add(t);
 	}
 	
 	public void addArtifact(Artifact a) {
-		artifacts.add(a);
+		((CaveElement) getChildAt(1)).add(a);		
+	}
+	
+	public void setJob(Job j) {
+		this.job = j;
 	}
 	
 	public int getEmpathy() {
@@ -47,12 +62,16 @@ public class Creature extends CaveObject{
 		return carryingCapacity;
 	}
 	
-	public ArrayList<Treasure> getTreasures() {
-		return treasures;
+	public Vector<CaveElement> getTreasures() {
+		return ((CaveElement) getChildAt(0)).getChildren();
 	}
 	
-	public ArrayList<Artifact> getArtifacts() {
-		return artifacts;
+	public Vector<CaveElement> getArtifacts() {
+		return ((CaveElement) getChildAt(1)).getChildren();
+	}
+	
+	public Job getJob() {
+		return job;
 	}
 	
 	public double getAge() {
@@ -65,6 +84,10 @@ public class Creature extends CaveObject{
 	
 	public double getWeight() {
 		return weight;
+	}
+	
+	public boolean getBusyFlag() {
+		return busyFlag;
 	}
 	
 	public void setEmpathy(int empathy) {
@@ -91,103 +114,47 @@ public class Creature extends CaveObject{
 		this.weight = weight;
 	}
 	
-	/**
-	 * First checks if this object is a match. Then, it continues the search through the treasures and artifacts.
-	 * @param index
-	 * @return CaveElement Objects that matched the search criteria
-	 */
-	@Override
-	public ArrayList<CaveElement> searchIndex(int index) {
-		ArrayList<CaveElement> matched = new ArrayList<CaveElement>();
-		if (getIndex() == index) matched.add(this);
-		
-		for(Treasure t : treasures) {
-			if (t.getIndex() == index) matched.add(t);
-		}
-		
-		for(Artifact a : artifacts) {
-			if (a.getIndex() == index) matched.add(a);
-		}
-		
-		return matched;
-	}
-	
-	/**
-	 * First checks if this object is a match. Then, it continues the search through the treasures and artifacts.
-	 * @param target
-	 * @return CaveElement Objects that matched the search criteria
-	 */
-	@Override
-	public ArrayList<CaveElement> searchName(String target) {
-		ArrayList<CaveElement> matched = new ArrayList<CaveElement>();
-		if (getName().equals(target)) matched.add(this);
-		
-		for(Treasure t : treasures) {
-			if (t.getName().equals(target)) matched.add(t);
-		}
-		
-		for(Artifact a : artifacts) {
-			if (a.getName().equals(target)) matched.add(a);
-		}
-		return matched;
-	}
-	
-	/**
-	 * First checks if this object is a match. Then, it continues the search through the treasures and artifacts.
-	 * @param target
-	 * @return CaveElement Objects that matched the search criteria
-	 */
-	@Override
-	public ArrayList<CaveElement> searchType(String target) {
-		ArrayList<CaveElement> matched = new ArrayList<CaveElement>();
-		if (getType().equals(target)) matched.add(this);
-		
-		for(Treasure t : treasures) {
-			if (t.getType().equals(target)) matched.add(t);
-		}
-		
-		for(Artifact a : artifacts) {
-			if (a.getType().equals(target)) matched.add(a);
-		}
-		return matched;
-	}
+	public void setBusyFlag(boolean b) {
+		busyFlag = b;
+	}	
 	
 	public void sortName() {
-		Collections.sort(artifacts, new Comparator<Artifact>() {
+		if (getArtifacts() == null) return;
+		Collections.sort(getArtifacts(), new Comparator<CaveElement>() {
 			@Override
-			public int compare(Artifact a1, Artifact a2) {				
+			public int compare(CaveElement a1, CaveElement a2) {				
 				return a1.getName().compareTo(a2.getName());
 			}
 		});
 	}
 	
 	public void sortWeight() {
-		Collections.sort(treasures, new Comparator<Treasure>() {
+		if (getTreasures() == null) return;
+		Collections.sort(getTreasures(), new Comparator<CaveElement>() {
 			@Override
-			public int compare(Treasure t1, Treasure t2) {				
-				return Double.compare(t1.getWeight(), t2.getWeight());
+			public int compare(CaveElement t1, CaveElement t2) {				
+				return Double.compare(((Treasure) t1).getWeight(), ((Treasure) t2).getWeight());
 			}
 		});
 	}
 	
 	public void sortValue() {
-		Collections.sort(treasures, new Comparator<Treasure>() {
+		if (getTreasures() == null) return;
+		Collections.sort(getTreasures(), new Comparator<CaveElement>() {
 			@Override
-			public int compare(Treasure t1, Treasure t2) {				
-				return Double.compare(t1.getValue(), t2.getValue());
+			public int compare(CaveElement t1, CaveElement t2) {				
+				return Double.compare(((Treasure) t1).getValue(), ((Treasure) t2).getValue());
 			}
 		});
 	}
-
+	
 	@Override
 	public String toString() { 
-		StringBuilder sb = new StringBuilder(super.toString());
-		sb.insert(1, getName() + ", ");
-		if (getAge() >= 0) sb.insert(sb.length() - 1, ", " + getAge());
-		if (getHeight() >= 0) sb.insert(sb.length() - 1, ", " + getHeight());
-		if (getWeight() >= 0) sb.insert(sb.length() - 1, ", " + getWeight());
-		if (!artifacts.isEmpty()) sb.append("\n\tArtifacts: " + artifacts.toString());
-		if (!treasures.isEmpty()) sb.append("\n\tTreasures: " + treasures.toString());
+		StringBuilder sb = new StringBuilder();
+		sb.append(getName() + ", " + getType());
+		if (getAge() >= 0) sb.insert(sb.length(), ", " + getAge());
+		if (getHeight() >= 0) sb.insert(sb.length(), ", " + getHeight());
+		if (getWeight() >= 0) sb.insert(sb.length(), ", " + getWeight());
 		return sb.toString();
 	}
 }
