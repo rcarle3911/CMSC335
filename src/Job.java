@@ -1,16 +1,15 @@
 import java.awt.Color;
-import java.awt.Component;
-import java.awt.GridLayout;
+import java.awt.Dimension;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Random;
-
 import javax.swing.*;
 import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.TreeNode;
-import javax.swing.tree.TreePath;
 
 /**
  * <li>FileName: Job.java
@@ -33,7 +32,6 @@ public class Job extends CaveElement implements Runnable{
 	
 	private HashMap<String, Integer> rqmnts = new HashMap<String, Integer>();
 	private DefaultTreeModel model;
-
 	
 	private long jobTime;
 	private int timeWorked;
@@ -53,27 +51,57 @@ public class Job extends CaveElement implements Runnable{
 		setJobTime(jobTime);	
 		this.timeWorked = 0;
 		this.model = model;
+		//Color defColor = panel.getBackground();
+		MouseAdapter mouseHover = new MouseAdapter() {
+			Color defColor = panel.getBackground();
+			@Override
+			public void mouseEntered(MouseEvent e) {
+				panel.setBackground(Color.lightGray);
+			}
+			
+			@Override
+			public void mouseExited(MouseEvent e) {
+				panel.setBackground(defColor);
+			}
+		};
 		
-	
+		jbGo.addMouseListener(mouseHover);
+		jbKill.addMouseListener(mouseHover);
+		pm.addMouseListener(mouseHover);
 	}
 	
 	public void startJob() {
-		panel.add(pm);
-		panel.add(new JLabel (getParent().getName(), SwingConstants.LEFT));
-		panel.add(new JLabel (getName(), SwingConstants.LEFT));		
+		GridBagConstraints c = new GridBagConstraints();
+		c.fill = GridBagConstraints.BOTH;
+		c.weighty = 1.0;
+		int height = 15;
+
+		panel.setLayout(new GridBagLayout());
 		
-		panel.add(jbGo);
-		panel.add(jbKill);
+		JLabel lbl = new JLabel(getParent().getParent().getName() + ": " + getName(), SwingConstants.LEFT);
+		lbl.setPreferredSize(new Dimension(180, height));
 		
-		jbGo.addActionListener(e -> toggleGoFlag());
-		jbGo.setHorizontalAlignment(SwingConstants.LEFT);
+		panel.add(lbl, c);		
+		
+		jbGo.setToolTipText("Click to pause");
+		jbGo.setPreferredSize(new Dimension(80, height));
+		jbKill.setPreferredSize(new Dimension(80, height));
+
+		panel.add(jbGo, c);
+		panel.add(jbKill, c);
+		
+		pm.setPreferredSize(new Dimension(200, height));
+		
+		
+		c.weightx = 1.0;	
+		
+		panel.add(pm, c);
+		
+		jbGo.addActionListener(e -> toggleGoFlag());		
 		jbKill.addActionListener(e -> setKillFlag());
-		jbKill.setHorizontalAlignment(SwingConstants.LEFT);
 		
-		panel.setAlignmentX(Component.LEFT_ALIGNMENT);
-		pm.setAlignmentX(Component.LEFT_ALIGNMENT);
-		pm.setStringPainted(true);	
-		
+		pm.setStringPainted(true);
+				
 		(new Thread (this, getParent().getName() + " " + getName())).start();
 	}
 	
@@ -103,11 +131,18 @@ public class Job extends CaveElement implements Runnable{
 	
 	public void toggleGoFlag() {
 		goFlag = !goFlag;
+		if (noKillFlag) {
+			if(!goFlag) showStatus (Status.SUSPENDED);
+			else if((this.equals(((Creature) getParent().getParent()).getJob())) && ((Creature) getParent().getParent()).getBusyFlag()) showStatus(Status.RUNNING);
+			else showStatus(Status.WAITING);
+		}
 	}
 	
 	public void setKillFlag() {
-		noKillFlag = false;
-		jbKill.setBackground(Color.red);
+		if (noKillFlag) {
+			noKillFlag = false;
+			jbKill.setBackground(Color.red);
+		}		
 	}
 	
 	public void showStatus (Status st) {
@@ -133,13 +168,14 @@ public class Job extends CaveElement implements Runnable{
 	}
 	
 	public void run() {
-		Creature worker = (Creature) getParent();	
+		Creature worker = (Creature) getParent().getParent();	
 		
 		
 
 		synchronized (worker.getParent()) {
 			while (worker.getBusyFlag()) {
-				showStatus (Status.WAITING);
+				if (goFlag) showStatus (Status.WAITING);
+				else showStatus(Status.SUSPENDED);
 				try {
 					worker.getParent().wait();
 				} catch (InterruptedException e) {}
@@ -148,6 +184,7 @@ public class Job extends CaveElement implements Runnable{
 			worker.setJob(this);
 		}
 		
+		//I used SwingWorker because I wanted to update a progress bar in the JTree. Code structure is a mix of Java tutorials and the professor's example code.
 		SwingWorker<Integer, Integer> swingWorker = new SwingWorker<Integer, Integer>() {
 			long time = System.currentTimeMillis();
 			long startTime = time;
@@ -164,7 +201,7 @@ public class Job extends CaveElement implements Runnable{
 						showStatus (Status.RUNNING);
 						time += 100;
 						timeWorked = (int)(((time - startTime) / duration) * 100);
-						setProgress(timeWorked);
+						setProgress(timeWorked);						//Kicks off a property change event
 					} else {
 						showStatus (Status.SUSPENDED);
 					}
@@ -175,6 +212,7 @@ public class Job extends CaveElement implements Runnable{
 			
 			@Override
 			protected void done() {
+				noKillFlag = false;
 				pm.setValue(100);
 				worker.setJob(null);
 				worker.setUserObject(0);
@@ -184,18 +222,19 @@ public class Job extends CaveElement implements Runnable{
 					worker.getParent().notifyAll();
 
 				}
-				model.nodeChanged(worker);
+				model.nodeChanged(worker);  			//Lets the tree model know this node has changed
 			}
 		};
 		swingWorker.addPropertyChangeListener(new PropertyChangeListener() {
 			@Override
 			public void propertyChange(PropertyChangeEvent e) {
-				
+				//Fires off when setProgress is called.
 				if (e.getPropertyName().equals("progress")) {
 					int i = (int) e.getNewValue();
-					pm.setValue(i);
-					worker.setUserObject(i);
-					model.nodeChanged(worker);
+					pm.setValue(i);						//This progress bar is in the Jobs area tab
+					worker.setUserObject(i);			//The worker node's user object is used to update the JTree progress bar
+					model.nodeChanged(worker); 			//Lets the tree model know this node has changed
+					
 				}
 			}
 		});
@@ -206,6 +245,6 @@ public class Job extends CaveElement implements Runnable{
 	
 	@Override
 	public String toString() {
-		return "Job: " + getIndex() + ", " + getName() + ", " + jobTime;
+		return getName() + ", I: " + getIndex() + ", T: " + jobTime;
 	}
 }

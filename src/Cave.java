@@ -1,16 +1,11 @@
-import java.awt.Component;
 import java.io.File;
 import java.util.ArrayDeque;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Scanner;
 import java.util.Vector;
-
 import javax.swing.JPanel;
-import javax.swing.JTree;
 import javax.swing.tree.*;
 
 /**
@@ -276,10 +271,10 @@ public class Cave extends CaveElement{
 		try {
 			ArrayDeque<String> queue = splitLine(line);
 			
-			int index = Integer.parseInt(queue.poll());			//index
-			String name = queue.poll();								//name
-			CaveElement parent = hm.get(Integer.parseInt(queue.poll()));		//parent
-			Long jobTime = Long.parseLong(queue.poll());				//job time
+			int index = Integer.parseInt(queue.poll());
+			String name = queue.poll();
+			CaveElement parent = hm.get(Integer.parseInt(queue.poll()));		
+			Long jobTime = Long.parseLong(queue.poll());
 			
 			Job job = new Job(index, name, jobTime, model);
 			
@@ -287,7 +282,7 @@ public class Cave extends CaveElement{
 				job.addReq(queue.poll(), Integer.parseInt(queue.poll()));
 			}	
 			
-			parent.add(job);			
+			((Creature) parent).addJob(job);			
 			job.startJob();
 			
 			jobPanel.add(job.getPBar());
@@ -332,6 +327,7 @@ public class Cave extends CaveElement{
 	}
 	
 	public Vector<CaveElement> getParties() {
+
 		return ((CaveElement) getChildAt(0)).getChildren();
 	}
 	
@@ -411,5 +407,68 @@ public class Cave extends CaveElement{
 	@Override
 	public CaveElement getParent() {
 		return null;
+	}
+	
+	public void clear() {
+		if (getParties() != null) {
+			for (CaveElement p : getParties()) {
+				if (!p.isLeaf()) {
+					for (CaveElement c : p.getChildren()) {
+						if (((Creature) c).getJobs() != null) {
+							for (CaveElement j : ((Creature) c).getJobs()) {
+								((Job) j).setKillFlag();
+							}
+						}						
+					}
+				}
+			}
+		}
+		
+		if (getLooseObj() != null) {
+			for (CaveElement p : getLooseObj()) {
+				if (p instanceof Party && p.getChildren() != null) {
+					for (CaveElement c : p.getChildren()) {
+						if (((Creature) c).getJobs() != null) {
+							for (CaveElement j : ((Creature) c).getJobs()) {
+								((Job) j).setKillFlag();
+							}
+						}	
+					}
+				} else if (p instanceof Creature && ((Creature) p).getJobs() != null) {
+					if (((Creature) p).getJobs() != null) {
+						for (CaveElement j : ((Creature) p).getJobs()) {
+							((Job) j).setKillFlag();
+						}
+					}	
+				}
+			}
+		}
+		
+		((DefaultMutableTreeNode) getChildAt(0)).removeAllChildren();
+		((DefaultMutableTreeNode) getChildAt(1)).removeAllChildren();
+	}
+	
+	public String display() {
+		StringBuilder sb = new StringBuilder();
+		sb.append(toString());
+		for (CaveElement p : getParties()) {
+			sb.append("\n\n" + p);			
+			for (CaveElement c : p.getChildren()) {
+				Creature c1 = (Creature) c;
+				sb.append("\n\t" + c1);
+				sb.append("\n\t\tTreasures: " + (c1.getTreasures() == null ? "None" : c1.getTreasures()));
+				sb.append("\n\t\tArtifacts: " + (c1.getArtifacts() == null ? "None" : c1.getArtifacts()));
+				sb.append("\n\t\tJobs: " + (c1.getJobs() == null ? "None" : c1.getJobs()));				
+			}
+		}
+		
+		if (getLooseObj() != null) {
+			sb.append("\nLoose Objects:");
+			for (CaveElement ce : getLooseObj()) {
+				sb.append("\n" + ce);
+			}
+		}
+		
+		return sb.toString();
 	}
 }

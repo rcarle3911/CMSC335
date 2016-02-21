@@ -28,7 +28,7 @@ public class Artifact extends CaveElement{
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append(getType() + ", " + getIndex());
+		sb.append("T: " + getType() + ", I: " + getIndex());
 		if (!getName().equals("")) sb.insert(0, getName() + ", ");
 		return sb.toString();		
 	}

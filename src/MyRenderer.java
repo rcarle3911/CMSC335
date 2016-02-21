@@ -1,12 +1,20 @@
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
-
 import javax.swing.*;
 import javax.swing.tree.DefaultTreeCellRenderer;
-import javax.swing.tree.DefaultTreeModel;
 
-
+/**
+ * <li>FileName: MyRenderer.java
+ * <li>Class: CMSC 335 6380 Object-Oriented and Concurrent Programming
+ * <li>Project 3
+ * <li>Author: Robert Lee Carle
+ * <li>Date: 2/8/2016
+ * <li>Platform/Compiler: Java 8 with Eclipse IDE
+ * <li>Instructor: Nicholas Duchon
+ * <li>Purpose: Modifies the default renderer for the JTree. Allows the addition of a progress bar.
+ * <li>Due: 2/22/2016
+ */
 public class MyRenderer extends DefaultTreeCellRenderer{
 	/**
 	 * 
@@ -17,13 +25,12 @@ public class MyRenderer extends DefaultTreeCellRenderer{
 	private JLabel label = new JLabel();
 	private JProgressBar pm = new JProgressBar(0, 100);
 	private DefaultTreeCellRenderer defR = new DefaultTreeCellRenderer();
-
+	
 	public MyRenderer() {
 		super();
 		FlowLayout layout = (FlowLayout) panel.getLayout();
 		layout.setVgap(0);
-		layout.setHgap(0);
-		//panel.setPreferredSize(new Dimension(600, 20));
+		layout.setHgap(0);	
 	}
 	
 	

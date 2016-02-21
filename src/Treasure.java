@@ -63,7 +63,7 @@ public class Treasure extends CaveElement{
 	
 	@Override
 	public String toString() {
-		return (getType() + ", " + getIndex() + ", " + this.getWeight() + ", " + this.getValue());
+		return (getType() + ", I: " + getIndex() + ", W: " + getWeight() + ", V: " + getValue());
 	}
 	
 }

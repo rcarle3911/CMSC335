@@ -1,6 +1,9 @@
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.EventQueue;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.event.*;
 import java.util.ArrayList;
@@ -44,13 +47,9 @@ public class GUI extends JFrame{
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		setLayout(new BorderLayout());
 		
-		JPanel tabPanel = new JPanel(new GridLayout(1,1));
-		tabPanel.add(tabPane);
-		tabPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
-		
 		tabPane.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
-		add(tabPanel, BorderLayout.CENTER);
-			
+		add(tabPane, BorderLayout.CENTER);
+				
 		setButtonPanel();
 		setTextArea();
 		setTreeArea();
@@ -69,27 +68,35 @@ public class GUI extends JFrame{
 		
 		//Load button grabs a file and loads it into the cave object.
 		JButton ld = new JButton("Load");
-		ld.addActionListener(new ActionListener() {
+		
+		ActionListener ldAction = new ActionListener() {
 			public void actionPerformed (ActionEvent e) {
 				//Returns an integer based on if the user clicks open or cancel.
 				int fcReturn = fc.showOpenDialog(GUI.this);
 				//If the users clicked open, then proceed.
 				if (fcReturn == JFileChooser.APPROVE_OPTION) {
 					text.setText("Loading " + fc.getSelectedFile().getName() + "\n");
+					cave.clear();
+					jobPanel.removeAll();
 					cave.loadFile(fc.getSelectedFile(), jobPanel, model);
 					model.setRoot(cave);
 					text.append("File loaded");
 				}				
 			}
-		});
+		};
 		
-		//Display button simply prints the cave.toString() to the text field.
+		ld.addActionListener(ldAction);
+		
+		//Display button simply prints the cave.display() to the text field.
 		JButton dsp = new JButton("Display");
-		dsp.addActionListener(new ActionListener() {
+		
+		ActionListener dspAction = new ActionListener() {
 			public void actionPerformed (ActionEvent e) {
-				text.setText(cave.toString());
+				text.setText(cave.display());
 			}
-		});
+		};
+		
+		dsp.addActionListener(dspAction);
 		
 		//Searches through the underlying structure for a match.
 		ActionListener search = new ActionListener() {
@@ -139,7 +146,7 @@ public class GUI extends JFrame{
 		JButton searchBtn = new JButton("Search");
 		searchBtn.setToolTipText("Searches for matches based on drop down selection and text field");
 		JLabel searchLbl = new JLabel("Search Target");
-		
+		searchLbl.setBorder(BorderFactory.createLineBorder(Color.lightGray));
 		//Adds search action listener to when search button is pressed and when enter is pressed from the text field.
 		searchBtn.addActionListener(search);
 		tField.addActionListener(search);
@@ -149,10 +156,10 @@ public class GUI extends JFrame{
 		sortBtn.addActionListener(new ActionListener() {
 			public void actionPerformed (ActionEvent e) {
 				sort(((String)sortCbx.getSelectedItem()));
-				text.setText(cave.toString());
+				text.setText(cave.display());
 			}
 		});
-		sortBtn.setToolTipText("Sorts bases on drop down selection");		
+		sortBtn.setToolTipText("Sorts bases on drop down selection");	
 		
 		//Order matters here as the index is used by the search method.
 		searchCbx.addItem("Index");		
@@ -171,21 +178,68 @@ public class GUI extends JFrame{
 		sortCbx.addItem("Value");
 		sortCbx.setToolTipText("Select what to base sorting on");
 		
-		JPanel panel = new JPanel();
-		panel.add(ld);
-		panel.add(dsp);
-		panel.add(tField);
-		panel.add(searchLbl);	
-		panel.add(searchCbx);
-		panel.add(searchBtn);
-		panel.add(sortCbx);
-		panel.add(sortBtn);		
+		JPanel panel = new JPanel(new GridBagLayout());
+		GridBagConstraints c = new GridBagConstraints();
+		c.fill = GridBagConstraints.BOTH;
+		
+	
+		panel.add(ld, c);
+		panel.add(dsp, c);
+		c.weightx = 1.0;
+		panel.add(tField, c);
+		c.weightx = 0.05;
+		panel.add(searchLbl, c);	
+		panel.add(searchCbx, c);
+		panel.add(searchBtn, c);
+		panel.add(sortCbx, c);
+		panel.add(sortBtn, c);		
+		
+		
+		/** Thinking about switching to a menu bar
+		JMenuBar menu = new JMenuBar();
+		
+		JMenu fileMenu = new JMenu("File");
+		JMenu actionMenu = new JMenu("Search");
+		
+		JMenuItem ldMItem = new JMenuItem("Load");
+		JMenuItem dspMItem = new JMenuItem("Display");
+		JMenuItem exitMItem = new JMenuItem("Exit");
+		JMenuItem searchMItem = new JMenuItem("Search");
+		JMenuItem sortMItem = new JMenuItem("Sort");
+				
+		ldMItem.addActionListener(ldAction);
+		dspMItem.addActionListener(dspAction);
+		
+		exitMItem.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				System.exit(0);
+			}			
+		});
+		
+		searchMItem.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				
+			}			
+		});
+		
+		fileMenu.add(ldMItem);
+		fileMenu.add(dspMItem);
+		fileMenu.add(exitMItem);
+		
+		
+		menu.add(fileMenu);
+				
+		panel.add(menu);
+		
+		**/
 		
 		add(panel, BorderLayout.PAGE_START);
 	}
 	
 	/**
-	 * Sets the text area to default.
+	 * Sets the text area to default and adds it to the tabbed pane
 	 */
 	private void setTextArea() {
 	
@@ -197,27 +251,57 @@ public class GUI extends JFrame{
 	}
 	
 	/**
-	 * Sets the text area to default.
+	 * Builds the JTree and adds it to the tabbed pane.
 	 */
 	private void setTreeArea() {
+		JButton expandAll = new JButton("Expand All");
+		expandAll.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					int row = 0;
+					while (row < tree.getRowCount()) {
+						tree.expandRow(row);
+						row++;
+					}
+				}				
+			});
+		
+		JButton collapseAll = new JButton("Collapse All");
+		collapseAll.addActionListener(new ActionListener() {
+
+			@Override			
+			public void actionPerformed(ActionEvent e) {
+				int row = tree.getRowCount() - 1;
+				while (row >= 0) {
+					tree.collapseRow(row);
+					row--;
+				}
+			}			
+		});
+		
+		
+		JPanel btnPanel = new JPanel(new GridLayout(1,1));
+		btnPanel.add(expandAll);
+		btnPanel.add(collapseAll);
+				
 		model = new DefaultTreeModel(cave);
 		tree = new JTree(model);		
 		
-		JScrollPane pane = new JScrollPane(tree);		
+		JScrollPane treeScrollPane = new JScrollPane(tree);
+		JPanel treePanel = new JPanel(new BorderLayout());
+		treePanel.add(btnPanel, BorderLayout.NORTH);
+		treePanel.add(treeScrollPane, BorderLayout.CENTER);
 		
-		//add(pane, BorderLayout.CENTER);
-		
-		tabPane.add("Trea Area", pane);
+		tabPane.add("Tree Area", treePanel);
 		
 	}
 	
-	private void setJobArea() {
-		jobPanel.setLayout(new GridLayout(0,1));
-		jobPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
-		
+	/**
+	 * Builds the job panel.
+	 */
+	private void setJobArea() {		
+		jobPanel.setLayout(new GridLayout(0,1));		
 		JScrollPane pane = new JScrollPane(jobPanel);
-		
-		pane.setAlignmentX(Component.LEFT_ALIGNMENT);
 		tabPane.add("Job Area", pane);
 	}
 	
@@ -282,8 +366,6 @@ public class GUI extends JFrame{
 				GUI gui = new GUI(cave);
 				MyRenderer renderer = new MyRenderer();
 				gui.tree.setCellRenderer(renderer);
-				//gui.tree.setEditable(true);
-				//gui.tree.setCellEditor(new MyEditor(gui.tree, renderer));
 			}
 		});
 		

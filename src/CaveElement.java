@@ -1,6 +1,4 @@
-
 import java.util.*;
-
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.MutableTreeNode;
 
@@ -22,11 +20,8 @@ public class CaveElement extends DefaultMutableTreeNode{
 	 * 
 	 */
 	private static final long serialVersionUID = 1234L;
-	static public final Enumeration<CaveElement> EMPTY_ENUMERATION = Collections.emptyEnumeration();
 	private String name, type;
 	private int caveIndex;
-	//private CaveElement parent;
-	//protected ArrayList<CaveElement> children = new ArrayList<CaveElement>();
 	
 	public CaveElement(int index) {
 		this(index, "");
@@ -91,9 +86,12 @@ public class CaveElement extends DefaultMutableTreeNode{
 		if (index < 0) return matched;
 		if (getIndex() == index) matched.add(this);
 		
-		for(Object c : children) {
-			matched.addAll(((CaveElement) c).searchIndex(index));
-		}		
+		if (!isLeaf()) {
+			for(Object c : children) {
+				matched.addAll(((CaveElement) c).searchIndex(index));
+			}	
+		}
+			
 		return matched;
 	}
 	
@@ -106,9 +104,12 @@ public class CaveElement extends DefaultMutableTreeNode{
 		Vector<CaveElement> matched = new Vector<CaveElement>();
 		if (getName().equals(target)) matched.add(this);
 		
-		for(Object c : children) {
-			matched.addAll(((CaveElement) c).searchName(target));
-		}		
+		if (!isLeaf()) {
+			for(Object c : children) {
+				matched.addAll(((CaveElement) c).searchName(target));
+			}	
+		}
+			
 		return matched;
 	}
 	
@@ -121,9 +122,12 @@ public class CaveElement extends DefaultMutableTreeNode{
 		Vector<CaveElement> matched = new Vector<CaveElement>();
 		if (getType().equals(target)) matched.add(this);
 		
-		for(Object c : children) {
-			matched.addAll(((CaveElement) c).searchType(target));
-		}		
+		if (!isLeaf()) {
+			for(Object c : children) {
+				matched.addAll(((CaveElement) c).searchType(target));
+			}	
+		}
+			
 		return matched;
 	}
 	
