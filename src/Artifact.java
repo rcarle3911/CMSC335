@@ -10,10 +10,6 @@
  * <li>Due: 2/22/2016
  */
 public class Artifact extends CaveElement{
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1234L;
 	
 	/**
 	 * Constructor for an artifact.

@@ -14,10 +14,7 @@ import java.util.Vector;
  * <li>Due: 2/22/2016
  */
 public class Creature extends CaveElement{
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1234L;
+	
 	private int empathy, fear;
 	private double carryingCapacity, age = -1.0, height = -1.0, weight = -1.0;
 	private boolean busyFlag = false;

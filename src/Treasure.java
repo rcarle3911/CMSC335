@@ -10,10 +10,7 @@
  * <li>Due: 2/22/2016
  */
 public class Treasure extends CaveElement{
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1234L;
+
 	private double weight, value;
 	
 	/**

@@ -15,11 +15,6 @@ import java.util.Vector;
  */
 public class Party extends CaveElement{
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1234L;
-
 	public Party(int index, String name) {
 		super(index, name);
 		

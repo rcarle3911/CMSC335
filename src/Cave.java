@@ -21,15 +21,6 @@ import javax.swing.tree.*;
  */
 public class Cave extends CaveElement{	
 	
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1234L;
-	
-	//private ArrayList<CaveElement> children = new ArrayList<CaveElement>();
-	//private ArrayList<CaveElement> parties = new ArrayList<CaveElement>();
-	//private ArrayList<CaveElement> looseObj = new ArrayList<CaveElement>();
-	
 	public Cave(String name) {
 		super(-1, name);
 		
@@ -44,6 +35,7 @@ public class Cave extends CaveElement{
 	 */
 	public void loadFile(File file, JPanel jobPanel, DefaultTreeModel model) {
 		try {
+			
 			HashMap<Integer, CaveElement> hm = new HashMap<Integer, CaveElement>();
 			Scanner s = new Scanner(file);
 			String line;
@@ -267,7 +259,7 @@ public class Cave extends CaveElement{
 		}			
 	}
 	
-	private void addJob(String line, HashMap<Integer, CaveElement> hm, JPanel jobPanel, DefaultTreeModel model) {
+	private Job addJob(String line, HashMap<Integer, CaveElement> hm, JPanel jobPanel, DefaultTreeModel model) {
 		try {
 			ArrayDeque<String> queue = splitLine(line);
 			
@@ -288,8 +280,10 @@ public class Cave extends CaveElement{
 			jobPanel.add(job.getPBar());
 			jobPanel.setAlignmentX(JPanel.LEFT_ALIGNMENT);
 			
-		} catch (Exception e) {
+			return job;
 			
+		} catch (Exception e) {
+			return null;
 		}
 	}	
 	
@@ -444,8 +438,8 @@ public class Cave extends CaveElement{
 			}
 		}
 		
-		((DefaultMutableTreeNode) getChildAt(0)).removeAllChildren();
-		((DefaultMutableTreeNode) getChildAt(1)).removeAllChildren();
+		((CaveElement) getChildAt(0)).removeAllChildren();
+		((CaveElement) getChildAt(1)).removeAllChildren();
 	}
 	
 	public String display() {

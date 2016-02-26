@@ -23,10 +23,6 @@ import javax.swing.tree.DefaultTreeModel;
  * <li>Due: 2/22/2016
  */
 public class Job extends CaveElement implements Runnable{
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1234L;
 	
 	static Random rn = new Random ();
 	
@@ -90,8 +86,7 @@ public class Job extends CaveElement implements Runnable{
 		panel.add(jbGo, c);
 		panel.add(jbKill, c);
 		
-		pm.setPreferredSize(new Dimension(200, height));
-		
+		pm.setPreferredSize(new Dimension(200, height));		
 		
 		c.weightx = 1.0;	
 		
@@ -102,7 +97,7 @@ public class Job extends CaveElement implements Runnable{
 		
 		pm.setStringPainted(true);
 				
-		(new Thread (this, getParent().getName() + " " + getName())).start();
+		//(new Thread (this, getParent().getParent().getName() + ": " + getName())).start();
 	}
 	
 	public void addReq(String type, int num) {
@@ -168,10 +163,7 @@ public class Job extends CaveElement implements Runnable{
 	}
 	
 	public void run() {
-		Creature worker = (Creature) getParent().getParent();	
-		
-		
-
+		Creature worker = (Creature) getParent().getParent();
 		synchronized (worker.getParent()) {
 			while (worker.getBusyFlag()) {
 				if (goFlag) showStatus (Status.WAITING);

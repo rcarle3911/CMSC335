@@ -1,14 +1,11 @@
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.EventQueue;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.event.*;
-import java.util.ArrayList;
 import java.util.Vector;
-
 import javax.swing.*;
 import javax.swing.tree.*;
 
@@ -360,6 +357,7 @@ public class GUI extends JFrame{
 	}
 	
 	public static void main(String[] args) {
+		
 		EventQueue.invokeLater(new Runnable() {
 			@Override public void run() {
 				Cave cave = new Cave("Sorcerer's Cave");
