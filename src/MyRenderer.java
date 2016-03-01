@@ -7,13 +7,13 @@ import javax.swing.tree.DefaultTreeCellRenderer;
 /**
  * <li>FileName: MyRenderer.java
  * <li>Class: CMSC 335 6380 Object-Oriented and Concurrent Programming
- * <li>Project 3
+ * <li>Final
  * <li>Author: Robert Lee Carle
- * <li>Date: 2/8/2016
+ * <li>Date: 2/27/2016
  * <li>Platform/Compiler: Java 8 with Eclipse IDE
  * <li>Instructor: Nicholas Duchon
  * <li>Purpose: Modifies the default renderer for the JTree. Allows the addition of a progress bar.
- * <li>Due: 2/22/2016
+ * <li>Due: 3/7/2016
  */
 public class MyRenderer extends DefaultTreeCellRenderer{
 	/**
@@ -41,7 +41,6 @@ public class MyRenderer extends DefaultTreeCellRenderer{
 		if (value instanceof Creature) {
 			Creature c = (Creature) value;
 			Job job = c.getJob();
-			
 			
 			if (selected) panel.setBackground(defR.getBackgroundSelectionColor());
 			else panel.setBackground(defR.getBackgroundNonSelectionColor());			

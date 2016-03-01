@@ -1,23 +1,35 @@
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.io.File;
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Scanner;
 import java.util.Vector;
+
+import javax.swing.BorderFactory;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JProgressBar;
+import javax.swing.SwingConstants;
+import javax.swing.border.Border;
 import javax.swing.tree.*;
 
 /**
  * <li>FileName: Cave.java
  * <li>Class: CMSC 335 6380 Object-Oriented and Concurrent Programming
- * <li>Project 3
+ * <li>Final
  * <li>Author: Robert Lee Carle
- * <li>Date: 2/8/2016
+ * <li>Date: 2/27/2016
  * <li>Platform/Compiler: Java 8 with Eclipse IDE
  * <li>Instructor: Nicholas Duchon
  * <li>Purpose: Cave class which holds the parties and loads a data file.
- * <li>Due: 2/22/2016
+ * <li>Due: 3/7/2016
  */
 public class Cave extends CaveElement{	
 	
@@ -37,6 +49,8 @@ public class Cave extends CaveElement{
 		try {
 			
 			HashMap<Integer, CaveElement> hm = new HashMap<Integer, CaveElement>();
+			HashMap<Party, ArrayList<Job>> partyJobList = new HashMap<Party, ArrayList<Job>>();
+			
 			Scanner s = new Scanner(file);
 			String line;
 			while (s.hasNextLine()) {
@@ -46,7 +60,7 @@ public class Cave extends CaveElement{
 				case '/':
 					continue;
 				case 'p':
-					addParty(line, hm);
+					partyJobList.put(addParty(line, hm), new ArrayList<Job>());
 					break;
 				case 'c':
 					addCreature(line, hm);
@@ -58,13 +72,88 @@ public class Cave extends CaveElement{
 					addArtifact(line, hm);
 					break;
 				case 'j':
-					addJob(line, hm, jobPanel, model);
+					Job jerb = addJob(line, hm, model);
+					Party pernt = (Party) jerb.getParent().getParent().getParent();
+					partyJobList.get(pernt).add(jerb);
 					break;
 				default:
 					throw new Exception("Incorrect Format");
 				}
 			}
 			s.close();
+			
+			for (CaveElement p : getParties()) {
+				((Party) p).countResources(jobPanel);
+			}
+			int current = -100;
+			Border border = BorderFactory.createMatteBorder(1, 0, 0, 0, Color.lightGray);
+			Border hBorder = BorderFactory.createLineBorder(Color.lightGray);
+
+			
+			for(Map.Entry<Party, ArrayList<Job>> e : partyJobList.entrySet()) {
+				GridBagConstraints c = new GridBagConstraints();
+				c.fill = GridBagConstraints.BOTH;
+				c.weighty = 1.0;
+				int height = 15;
+				
+				JPanel header = new JPanel(new GridBagLayout());
+				JLabel nameH = new JLabel("Name");
+				nameH.setPreferredSize(new Dimension(180, height));
+				nameH.setBorder(hBorder);
+				nameH.setHorizontalAlignment(JLabel.CENTER);
+				header.add(nameH, c);
+				
+				JLabel availH = new JLabel("Available");
+				availH.setPreferredSize(new Dimension(250, height));
+				availH.setBorder(hBorder);
+				availH.setHorizontalAlignment(JLabel.CENTER);
+				header.add(availH, c);
+				
+				JLabel needH = new JLabel("Needs");
+				needH.setPreferredSize(new Dimension(250, height));
+				needH.setBorder(hBorder);
+				needH.setHorizontalAlignment(JLabel.CENTER);
+				header.add(needH, c);
+				
+				JLabel pausH = new JLabel("Pause");
+				pausH.setPreferredSize(new Dimension(80, height));
+				pausH.setBorder(hBorder);
+				pausH.setHorizontalAlignment(JLabel.CENTER);
+				header.add(pausH, c);
+				
+				JLabel stopH = new JLabel("Cancel");
+				stopH.setPreferredSize(new Dimension(80, height));
+				stopH.setBorder(hBorder);
+				stopH.setHorizontalAlignment(JLabel.CENTER);
+				header.add(stopH, c);
+				
+				JLabel pbH = new JLabel("Progress");
+				pbH.setPreferredSize(new Dimension(200, height));
+				pbH.setBorder(hBorder);
+				pbH.setHorizontalAlignment(JLabel.CENTER);
+				c.weightx = 1.0;
+				header.add(pbH, c);
+				
+				jobPanel.add(e.getKey().getResourcePanel());
+											
+				for (JProgressBar pb : e.getKey().getPBList()) {
+					jobPanel.add(pb);
+				}
+				
+				jobPanel.add(header);
+				
+				for (Job job : e.getValue()) {
+					job.startJob();
+					if (job.getParent().getParent().getIndex() != current) {
+						job.availLbl.setBorder(border);
+						job.nameLbl.setBorder(border);
+						job.needsLbl.setBorder(border);
+						current = job.getParent().getParent().getIndex();
+					}
+					
+					jobPanel.add(job.getPBar());
+				}
+			}
 			
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -95,12 +184,13 @@ public class Cave extends CaveElement{
 	 * @param line String of inputs
 	 * @param hm Hashmap of objects read in
 	 */
-	private void addParty(String line, HashMap<Integer, CaveElement> hm) {
+	private Party addParty(String line, HashMap<Integer, CaveElement> hm) {
 		ArrayDeque<String> queue = splitLine(line);
 		Party p = new Party(Integer.parseInt(queue.poll()),			//index
 							queue.poll());							//name
 		hm.put(p.getIndex(), p);
 		addParty(p);
+		return p;
 	}
 	
 	/**
@@ -259,14 +349,14 @@ public class Cave extends CaveElement{
 		}			
 	}
 	
-	private Job addJob(String line, HashMap<Integer, CaveElement> hm, JPanel jobPanel, DefaultTreeModel model) {
+	private Job addJob(String line, HashMap<Integer, CaveElement> hm, DefaultTreeModel model) {
 		try {
 			ArrayDeque<String> queue = splitLine(line);
-			
+
 			int index = Integer.parseInt(queue.poll());
 			String name = queue.poll();
 			CaveElement parent = hm.get(Integer.parseInt(queue.poll()));		
-			Long jobTime = Long.parseLong(queue.poll());
+			Long jobTime = (long) Double.parseDouble(queue.poll());
 			
 			Job job = new Job(index, name, jobTime, model);
 			
@@ -274,15 +364,12 @@ public class Cave extends CaveElement{
 				job.addReq(queue.poll(), Integer.parseInt(queue.poll()));
 			}	
 			
-			((Creature) parent).addJob(job);			
-			job.startJob();
-			
-			jobPanel.add(job.getPBar());
-			jobPanel.setAlignmentX(JPanel.LEFT_ALIGNMENT);
-			
+			((Creature) parent).addJob(job);
 			return job;
 			
 		} catch (Exception e) {
+			System.out.println(e.getMessage());
+			e.printStackTrace();
 			return null;
 		}
 	}	
@@ -330,6 +417,8 @@ public class Cave extends CaveElement{
 	}
 	
 	public void sortName() {
+		if (getParties() == null) return;
+		
 		Collections.sort(getParties(), new Comparator<CaveElement>() {
 			@Override
 			public int compare(CaveElement p1, CaveElement p2) {				
@@ -346,18 +435,24 @@ public class Cave extends CaveElement{
 	}
 	
 	public void sortAge() {
+		if (getParties() == null) return;
+		
 		for (CaveElement p : getParties()) {
 			((Party) p).sortAge();
 		}
 	}
 	
 	public void sortHeight() {
+		if (getParties() == null) return;
+		
 		for (CaveElement p : getParties()) {
 			((Party) p).sortHeight();
 		}
 	}
 	
 	public void sortWeight() {
+		if (getParties() == null) return;
+		
 		for (CaveElement p : getParties()) {
 			((Party) p).sortWeight();
 			for (CaveElement c : ((Party) p).getCreatures()) {
@@ -367,24 +462,32 @@ public class Cave extends CaveElement{
 	}
 	
 	public void sortEmpathy() {
+		if (getParties() == null) return;
+		
 		for (CaveElement p : getParties()) {
 			((Party) p).sortEmpathy();
 		}
 	}
 	
 	public void sortFear() {
+		if (getParties() == null) return;
+		
 		for (CaveElement p : getParties()) {
 			((Party) p).sortFear();
 		}
 	}
 	
 	public void sortCarryCap() {
+		if (getParties() == null) return;
+		
 		for (CaveElement p : getParties()) {
 			((Party) p).sortCarryCap();
 		}
 	}
 	
 	public void sortValue() {
+		if (getParties() == null) return;
+		
 		for (CaveElement p : getParties()) {
 			for (CaveElement c : ((Party) p).getCreatures()) {
 				((Creature) c).sortValue();
@@ -401,6 +504,42 @@ public class Cave extends CaveElement{
 	@Override
 	public CaveElement getParent() {
 		return null;
+	}
+	
+	public void toggleAll() {
+		if (getParties() != null) {
+			for (CaveElement p : getParties()) {
+				if (!p.isLeaf()) {
+					for (CaveElement c : p.getChildren()) {
+						if (((Creature) c).getJobs() != null) {
+							for (CaveElement j : ((Creature) c).getJobs()) {
+								((Job) j).toggleGoFlag();
+							}
+						}						
+					}
+				}
+			}
+		}
+		
+		if (getLooseObj() != null) {
+			for (CaveElement p : getLooseObj()) {
+				if (p instanceof Party && p.getChildren() != null) {
+					for (CaveElement c : p.getChildren()) {
+						if (((Creature) c).getJobs() != null) {
+							for (CaveElement j : ((Creature) c).getJobs()) {
+								((Job) j).toggleGoFlag();
+							}
+						}	
+					}
+				} else if (p instanceof Creature && ((Creature) p).getJobs() != null) {
+					if (((Creature) p).getJobs() != null) {
+						for (CaveElement j : ((Creature) p).getJobs()) {
+							((Job) j).toggleGoFlag();
+						}
+					}	
+				}
+			}
+		}
 	}
 	
 	public void clear() {
@@ -445,6 +584,9 @@ public class Cave extends CaveElement{
 	public String display() {
 		StringBuilder sb = new StringBuilder();
 		sb.append(toString());
+		
+		if (getParties() == null) return sb.toString();
+		
 		for (CaveElement p : getParties()) {
 			sb.append("\n\n" + p);			
 			for (CaveElement c : p.getChildren()) {
@@ -456,12 +598,12 @@ public class Cave extends CaveElement{
 			}
 		}
 		
-		if (getLooseObj() != null) {
-			sb.append("\nLoose Objects:");
-			for (CaveElement ce : getLooseObj()) {
-				sb.append("\n" + ce);
-			}
-		}
+		if (getLooseObj() == null) return sb.toString();
+		
+		sb.append("\nLoose Objects:");
+		for (CaveElement ce : getLooseObj()) {
+			sb.append("\n" + ce);
+		}		
 		
 		return sb.toString();
 	}

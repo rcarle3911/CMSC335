@@ -1,13 +1,13 @@
 /**
  * <li>FileName: Artifact.java
  * <li>Class: CMSC 335 6380 Object-Oriented and Concurrent Programming
- * <li>Project 3
+ * <li>Final
  * <li>Author: Robert Lee Carle
- * <li>Date: 2/8/2016
+ * <li>Date: 2/27/2016
  * <li>Platform/Compiler: Java 8 with Eclipse IDE
  * <li>Instructor: Nicholas Duchon
  * <li>Purpose: Artifact class.
- * <li>Due: 2/22/2016
+ * <li>3/7/2016
  */
 public class Artifact extends CaveElement{
 	

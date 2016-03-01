@@ -6,19 +6,20 @@ import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.event.*;
 import java.util.Vector;
+
 import javax.swing.*;
 import javax.swing.tree.*;
 
 /**
  * <li>FileName: GUI.java
  * <li>Class: CMSC 335 6380 Object-Oriented and Concurrent Programming
- * <li>Project 3
+ * <li>Final
  * <li>Author: Robert Lee Carle
- * <li>Date: 2/8/2016
+ * <li>Date: 2/27/2016
  * <li>Platform/Compiler: Java 8 with Eclipse IDE
  * <li>Instructor: Nicholas Duchon
  * <li>Purpose: Provides and graphical interface to the game. Executes main method.
- * <li>Due: 2/22/2016
+ * <li>Due: 3/7/2016
  */
 public class GUI extends JFrame{
 	/**
@@ -39,7 +40,7 @@ public class GUI extends JFrame{
 	public GUI(Cave cave) {
 		this.cave = cave;
 		setTitle("The Cave");
-		setSize(800,600);
+		setSize(1200,600);
 		setLocationRelativeTo(null);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		setLayout(new BorderLayout());
@@ -89,7 +90,7 @@ public class GUI extends JFrame{
 		
 		ActionListener dspAction = new ActionListener() {
 			public void actionPerformed (ActionEvent e) {
-				text.setText(cave.display());
+				if (cave != null) text.setText(cave.display());
 			}
 		};
 		
@@ -106,7 +107,7 @@ public class GUI extends JFrame{
 					case 0: 
 						String string = tField.getText();
 						if (isNumber(string)) matches = cave.searchIndex(Integer.parseInt(string));
-						else text.setText("Error: Attempted to use: " + tField.getText() + "as an index. This must be a number!");
+						else text.setText("Error: Attempted to use \"" + tField.getText() + "\" as an index. This must be a number!");
 						break;
 					
 					case 1:
@@ -296,9 +297,24 @@ public class GUI extends JFrame{
 	/**
 	 * Builds the job panel.
 	 */
-	private void setJobArea() {		
-		jobPanel.setLayout(new GridLayout(0,1));		
-		JScrollPane pane = new JScrollPane(jobPanel);
+	private void setJobArea() {
+		JPanel jobTab = new JPanel(new BorderLayout());
+		jobPanel.setLayout(new GridLayout(0,1));
+						
+		JButton toggleAllBtn = new JButton("Toggle All");
+		toggleAllBtn.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				cave.toggleAll();
+			}
+			
+		});		
+				
+		jobTab.add(toggleAllBtn, BorderLayout.NORTH);		
+		jobTab.add(jobPanel, BorderLayout.CENTER);
+		
+		JScrollPane pane = new JScrollPane(jobTab);
 		tabPane.add("Job Area", pane);
 	}
 	

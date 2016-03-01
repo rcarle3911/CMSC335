@@ -1,5 +1,4 @@
 import java.util.*;
-
 import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.TreeNode;
 
@@ -7,14 +6,15 @@ import javax.swing.tree.TreeNode;
 /**
  * <li>FileName: CaveElement.java
  * <li>Class: CMSC 335 6380 Object-Oriented and Concurrent Programming
- * <li>Project 3
+ * <li>Final
  * <li>Author: Robert Lee Carle
- * <li>Date: 2/8/2016
+ * <li>Date: 2/27/2016
  * <li>Platform/Compiler: Java 8 with Eclipse IDE
  * <li>Instructor: Nicholas Duchon
- * <li>Purpose: CaveElement class is the parent class that all elements of the game derive from. Most importantly enforces everything has an index
- * and search functions.
- * <li>Due: 2/22/2016
+ * <li>Purpose: <code>CaveElement</code> is the parent class that all elements of the game derive from. Most importantly enforces everything has an index.
+ * and search functions. I copied most of the code from <code>DefaultMutableTreeNode</code> and modified it a bit to get rid of warnings. I had to change the
+ * <code>Vector</code> children from raw to generic type.
+ * <li>Due: 3/7/2016
  */
 public class CaveElement implements MutableTreeNode{
 	
