@@ -1,13 +1,19 @@
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.event.*;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Scanner;
 import java.util.Vector;
-
 import javax.swing.*;
+import javax.swing.border.Border;
 import javax.swing.tree.*;
 
 /**
@@ -76,7 +82,7 @@ public class GUI extends JFrame{
 					text.setText("Loading " + fc.getSelectedFile().getName() + "\n");
 					cave.clear();
 					jobPanel.removeAll();
-					cave.loadFile(fc.getSelectedFile(), jobPanel, model);
+					loadFile(fc.getSelectedFile(), jobPanel, model);
 					model.setRoot(cave);
 					text.append("File loaded");
 				}				
@@ -179,7 +185,6 @@ public class GUI extends JFrame{
 		JPanel panel = new JPanel(new GridBagLayout());
 		GridBagConstraints c = new GridBagConstraints();
 		c.fill = GridBagConstraints.BOTH;
-		
 	
 		panel.add(ld, c);
 		panel.add(dsp, c);
@@ -191,47 +196,6 @@ public class GUI extends JFrame{
 		panel.add(searchBtn, c);
 		panel.add(sortCbx, c);
 		panel.add(sortBtn, c);		
-		
-		
-		/** Thinking about switching to a menu bar
-		JMenuBar menu = new JMenuBar();
-		
-		JMenu fileMenu = new JMenu("File");
-		JMenu actionMenu = new JMenu("Search");
-		
-		JMenuItem ldMItem = new JMenuItem("Load");
-		JMenuItem dspMItem = new JMenuItem("Display");
-		JMenuItem exitMItem = new JMenuItem("Exit");
-		JMenuItem searchMItem = new JMenuItem("Search");
-		JMenuItem sortMItem = new JMenuItem("Sort");
-				
-		ldMItem.addActionListener(ldAction);
-		dspMItem.addActionListener(dspAction);
-		
-		exitMItem.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				System.exit(0);
-			}			
-		});
-		
-		searchMItem.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				
-			}			
-		});
-		
-		fileMenu.add(ldMItem);
-		fileMenu.add(dspMItem);
-		fileMenu.add(exitMItem);
-		
-		
-		menu.add(fileMenu);
-				
-		panel.add(menu);
-		
-		**/
 		
 		add(panel, BorderLayout.PAGE_START);
 	}
@@ -370,6 +334,139 @@ public class GUI extends JFrame{
 		}
 		
 		model.reload();
+	}
+	
+	/**
+	 * Iterates line by line through the input file. The first character of the line determines how it's processed.
+	 * Uses a hashmap to collect all objects read in.
+	 * @param file 
+	 */
+	public void loadFile(File file, JPanel jobPanel, DefaultTreeModel model) {
+		try {
+			HashMap<Integer, Party> hmParty = new HashMap<Integer, Party>();
+			HashMap<Integer, Creature> hmCrea = new HashMap<Integer, Creature>();
+			HashMap<Party, ArrayList<Job>> partyJobList = new HashMap<Party, ArrayList<Job>>();
+			
+			Scanner s = new Scanner(file);
+			String line;
+			while (s.hasNextLine()) {
+				line = s.nextLine();
+				if (line.isEmpty()) continue;
+				switch (line.charAt(0)) {
+				case '/':
+					continue;
+				case 'p':
+					Party p = cave.addParty(line);
+					hmParty.put(p.getIndex(), p);
+					partyJobList.put(p, new ArrayList<Job>());
+					break;
+				case 'c':					
+					Creature c = cave.addCreature(line, hmParty);
+					hmCrea.put(c.getIndex(), c);
+					break;
+				case 't':
+					cave.addTreasure(line, hmCrea);
+					break;
+				case 'a':
+					cave.addArtifact(line, hmCrea);
+					break;
+				case 'j':
+					Job j = cave.addJob(line, hmCrea, model);
+					Party par = (Party) j.getParent().getParent().getParent();
+					partyJobList.get(par).add(j);
+					break;
+				default:
+					throw new Exception("Incorrect Format");
+				}
+			}
+			s.close();
+			
+			for (Map.Entry<Integer, Party> p : hmParty.entrySet()) {
+				p.getValue().countResources();
+			}
+			
+			int current = -100; // Initially set to an index that cannot exist.
+			Border border = BorderFactory.createMatteBorder(1, 0, 0, 0, Color.lightGray);
+						
+			for(Map.Entry<Party, ArrayList<Job>> e : partyJobList.entrySet()) {							
+				
+				jobPanel.add(e.getKey().getResourcePanel());
+											
+				for (JProgressBar pb : e.getKey().getPBList()) {
+					jobPanel.add(pb);
+				}
+				
+				jobPanel.add(createHeader());
+				
+				for (Job job : e.getValue()) {
+					job.startJob();
+					if (job.getParent().getParent().getIndex() != current) {
+						job.availLbl.setBorder(border);
+						job.nameLbl.setBorder(border);
+						job.needsLbl.setBorder(border);
+						current = job.getParent().getParent().getIndex();
+					}
+					
+					jobPanel.add(job.getPBar());
+				}
+			}
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * Creates a header panel for use in the job area
+	 * @return JPanel header
+	 */
+	private JPanel createHeader() {
+		Border hBorder = BorderFactory.createLineBorder(Color.lightGray);
+		
+		GridBagConstraints c = new GridBagConstraints();
+		c.fill = GridBagConstraints.BOTH;
+		c.weighty = 1.0;
+		int height = 15;
+		
+		JPanel header = new JPanel(new GridBagLayout());
+		JLabel nameH = new JLabel("Name");
+		nameH.setPreferredSize(new Dimension(180, height));
+		nameH.setBorder(hBorder);
+		nameH.setHorizontalAlignment(JLabel.CENTER);
+		header.add(nameH, c);
+		
+		JLabel availH = new JLabel("Available");
+		availH.setPreferredSize(new Dimension(250, height));
+		availH.setBorder(hBorder);
+		availH.setHorizontalAlignment(JLabel.CENTER);
+		header.add(availH, c);
+		
+		JLabel needH = new JLabel("Needs");
+		needH.setPreferredSize(new Dimension(250, height));
+		needH.setBorder(hBorder);
+		needH.setHorizontalAlignment(JLabel.CENTER);
+		header.add(needH, c);
+		
+		JLabel pausH = new JLabel("Pause");
+		pausH.setPreferredSize(new Dimension(80, height));
+		pausH.setBorder(hBorder);
+		pausH.setHorizontalAlignment(JLabel.CENTER);
+		header.add(pausH, c);
+		
+		JLabel stopH = new JLabel("Cancel");
+		stopH.setPreferredSize(new Dimension(80, height));
+		stopH.setBorder(hBorder);
+		stopH.setHorizontalAlignment(JLabel.CENTER);
+		header.add(stopH, c);
+		
+		JLabel pbH = new JLabel("Progress");
+		pbH.setPreferredSize(new Dimension(200, height));
+		pbH.setBorder(hBorder);
+		pbH.setHorizontalAlignment(JLabel.CENTER);
+		c.weightx = 1.0;
+		header.add(pbH, c);
+		
+		return header;
 	}
 	
 	public static void main(String[] args) {

@@ -117,7 +117,7 @@ public class Party extends CaveElement{
 		});
 	}
 	
-	public void countResources(JPanel jobPanel) {
+	public void countResources() {
 		for (CaveElement creature : children) {
 			if (((Creature) creature).getArtifacts() != null) {
 				for (CaveElement artifact : ((Creature) creature).getArtifacts()) {
