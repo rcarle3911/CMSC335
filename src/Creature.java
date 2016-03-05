@@ -1,37 +1,53 @@
-import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Vector;
 
 /**
  * <li>FileName: Creature.java
  * <li>Class: CMSC 335 6380 Object-Oriented and Concurrent Programming
- * <li>Project 1
+ * <li>Final
  * <li>Author: Robert Lee Carle
- * <li>Date: 1/11/2016
+ * <li>Date: 2/27/2016
  * <li>Platform/Compiler: Java 8 with Eclipse IDE
  * <li>Instructor: Nicholas Duchon
  * <li>Purpose: Creature class which holds the characteristics of the creature and a list of artifacts and treasures.
- * <li>Due: 1/24/2016
+ * <li>Due: 3/7/2016
  */
-public class Creature extends CaveObject{
-	private int empathy, fear;
-	private double carryingCapacity;
-	private ArrayList<Treasure> treasures = new ArrayList<Treasure>();
-	private ArrayList<Artifact> artifacts = new ArrayList<Artifact>();
+public class Creature extends CaveElement{
 	
+	private int empathy, fear;
+	private double carryingCapacity, age = -1.0, height = -1.0, weight = -1.0;
+	private boolean busyFlag = false;
+	private Job job = null;
 
-	public Creature(int index, String type, String name, int partyIndex, int empathy, int fear, double carryingCapacity) {
-		super(index, type, partyIndex, name);
+	public Creature(int index, String type, String name, int empathy, int fear, double carryingCapacity) {
+		super(index, name, type);
 		setEmpathy(empathy);
 		setFear(fear);
 		setCarryCap(carryingCapacity);
+		
+		setUserObject(0);
+		
+		add (new CaveElement(-1, "Treasures"));
+		add (new CaveElement(-1, "Artifacts"));
+		add (new CaveElement(-1, "Jobs"));
 	}
 	
 	public void addTreasure(Treasure t) {
-		treasures.add(t);
+		((CaveElement) getChildAt(0)).add(t);
 	}
 	
 	public void addArtifact(Artifact a) {
-		artifacts.add(a);
-	}	
+		((CaveElement) getChildAt(1)).add(a);		
+	}
+	
+	public void addJob(Job j) {
+		((CaveElement) getChildAt(2)).add(j);
+	}
+	
+	public void setJob(Job j) {
+		this.job = j;
+	}
 	
 	public int getEmpathy() {
 		return empathy;
@@ -45,12 +61,36 @@ public class Creature extends CaveObject{
 		return carryingCapacity;
 	}
 	
-	public ArrayList<Treasure> getTreasures() {
-		return treasures;
+	public Vector<CaveElement> getTreasures() {
+		return ((CaveElement) getChildAt(0)).getChildren();
 	}
 	
-	public ArrayList<Artifact> getArtifacts() {
-		return artifacts;
+	public Vector<CaveElement> getArtifacts() {
+		return ((CaveElement) getChildAt(1)).getChildren();
+	}
+	
+	public Vector<CaveElement> getJobs() {
+		return ((CaveElement) getChildAt(2)).getChildren();
+	}
+	
+	public Job getJob() {
+		return job;
+	}
+	
+	public double getAge() {
+		return age;
+	}
+	
+	public double getHeight() {
+		return height;
+	}
+	
+	public double getWeight() {
+		return weight;
+	}
+	
+	public boolean getBusyFlag() {
+		return busyFlag;
 	}
 	
 	public void setEmpathy(int empathy) {
@@ -65,77 +105,59 @@ public class Creature extends CaveObject{
 		this.carryingCapacity = carryingCapacity;
 	}
 	
-	/**
-	 * First checks if this object is a match. Otherwise, it continues the search through the creatures.
-	 * @param index
-	 * @return CaveObject
-	 */
-	public CaveObject search(int index) {
-		if (getIndex() == index) return this;
-		
-		for (Treasure t : treasures) {
-			if (t.getIndex() == index) return t;
-		}
-		
-		for (Artifact a : artifacts) {
-			if (a.getIndex() == index) return a;
-		}
-		
-		return null;
+	public void setAge(double age) {
+		this.age = age;
 	}
 	
-	/**
-	 * First checks if it's a match. Otherwise, it continues the search through its treasures and artifacts.
-	 * Throws exception if type input is invalid.
-	 * @param type 0 for index, 1 for Name, 2 for Type
-	 * @param target
-	 * @return
-	 * @throws Exception
-	 */
-	public CaveObject search(int type, String target) throws Exception {
-			
-		switch (type) {
-		case 0:
-			return search(Integer.parseInt(target));
-		case 1:
-			if (getName().equals(target)) return this;
-			
-			for (Treasure t : treasures) {
-				if (t.getName().equals(target)) return t;
+	public void setHeight(double height) {
+		this.height = height;
+	}
+	
+	public void setWeight(double weight) {
+		this.weight = weight;
+	}
+	
+	public void setBusyFlag(boolean b) {
+		busyFlag = b;
+	}	
+	
+	public void sortName() {
+		if (getArtifacts() == null) return;
+		Collections.sort(getArtifacts(), new Comparator<CaveElement>() {
+			@Override
+			public int compare(CaveElement a1, CaveElement a2) {				
+				return a1.getName().compareTo(a2.getName());
 			}
-			
-			for (Artifact a : artifacts) {
-				if (a.getName().equals(target)) return a;
+		});
+	}
+	
+	public void sortWeight() {
+		if (getTreasures() == null) return;
+		Collections.sort(getTreasures(), new Comparator<CaveElement>() {
+			@Override
+			public int compare(CaveElement t1, CaveElement t2) {				
+				return Double.compare(((Treasure) t1).getWeight(), ((Treasure) t2).getWeight());
 			}
-			
-			break;
-			
-		case 2:
-			if (getType().equals(target)) return this;
-			
-			for (Treasure t : treasures) {
-				if (t.getType().equals(target)) return t;
+		});
+	}
+	
+	public void sortValue() {
+		if (getTreasures() == null) return;
+		Collections.sort(getTreasures(), new Comparator<CaveElement>() {
+			@Override
+			public int compare(CaveElement t1, CaveElement t2) {				
+				return Double.compare(((Treasure) t1).getValue(), ((Treasure) t2).getValue());
 			}
-			
-			for (Artifact a : artifacts) {
-				if (a.getType().equals(target)) return a;
-			}
-			
-			break;
-		default:
-			throw new Exception(type + ": Invalid search selection. Must be 0, 1, or 2");
-		}
-		
-		return null;
+		});
 	}
 	
 	@Override
 	public String toString() { 
-		StringBuilder sb = new StringBuilder(super.toString());
-		sb.insert(1, getName() + ", ");
-		if (!artifacts.isEmpty()) sb.append("\n\tArtifacts: " + artifacts.toString());
-		if (!treasures.isEmpty()) sb.append("\n\tTreasures: " + treasures.toString());
-		sb.append('\n');
+		StringBuilder sb = new StringBuilder();
+		sb.append(getName() + ", I: " + getIndex() + ", T: " + getType() + ", E: " + getEmpathy() + ", F: " + getFear() + ", C: " + getCarryCap());
+		if (getAge() >= 0) sb.insert(sb.length(), ", A: " + getAge());
+		if (getHeight() >= 0) sb.insert(sb.length(), ", H: " + getHeight());
+		if (getWeight() >= 0) sb.insert(sb.length(), ", W: " + getWeight());
 		return sb.toString();
 	}
 }
